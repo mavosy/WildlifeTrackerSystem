@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="WTS.Models.AnimalBase.Animal" Collapsed="true">
+    <Position X="6.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACMAAAAAAABACAAEBAAAQAAAAAAAgAAAAAAAAACAA=</HashCode>
+      <FileName>Models\AnimalBase\Animal.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WTS.Models.Fish.Salmon" Collapsed="true">
+    <Position X="5.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAI=</HashCode>
+      <FileName>Models\Fish\Salmon.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
