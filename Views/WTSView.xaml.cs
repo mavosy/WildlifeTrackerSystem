@@ -1,13 +1,13 @@
 ﻿using System.Windows;
 
-namespace WTS
+namespace WTS.Views
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for WTSView.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class WTSView : Window
     {
-        public MainWindow()
+        public WTSView()
         {
             InitializeComponent();
         }

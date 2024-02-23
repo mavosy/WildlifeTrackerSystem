@@ -1,0 +1,234 @@
+﻿<Window x:Class="WTS.Views.WTSView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WTS.Views"
+        xmlns:vm="clr-namespace:WTS.ViewModels"
+        d:DataContext="{d:DesignInstance {x:Type vm:WTSViewModel}}"     
+        mc:Ignorable="d"
+        Title="WildlifeTracker" Height="600" Width="750">
+    <!--Data context = ViewModel. Makes bindings and MVVM work-->
+    <Window.DataContext>
+        <vm:WTSViewModel/>
+    </Window.DataContext>
+    <!--IValueConverter to toggle the visibility of input controllers with a boolean flag-->
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+    </Window.Resources>
+
+    <DockPanel>
+        <Grid DockPanel.Dock="Top" Margin="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100*"/>
+                <ColumnDefinition Width="50*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Data input -->
+            <StackPanel Grid.Column="0" Margin="5,5,5,5">
+                <TextBlock Text="Animal Specifications" FontWeight="Bold"/>
+                <StackPanel Orientation="Horizontal">
+                    <!--Name input-->
+                    <Label Content="Name" Target="{Binding ElementName=nameTextBox}" VerticalAlignment="Center" Width="80"/>
+                    <TextBox Name="nameTextBox" Width="150" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+                <!--Age input-->
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Age" Target="{Binding ElementName=ageTextBox}" VerticalAlignment="Center" Width="80"/>
+                    <TextBox Name="ageTextBox" Width="150" Text="{Binding AgeText, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+                <!--Gender input-->
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Gender" Target="{Binding ElementName=genderCombo}" VerticalAlignment="Center" Width="80"/>
+                    <ComboBox Name="genderCombo" Width="150" SelectedItem="{Binding SelectedGender}" ItemsSource="{Binding Genders}" DisplayMemberPath="."/>
+                </StackPanel>
+
+                <Grid Margin="0,10,0,0" Height="25">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100*"/>
+                        <ColumnDefinition Width="10*"/>
+                        <ColumnDefinition Width="100*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="100"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Column="0" Grid.Row="0">
+                        <!--Amphibian specific input-->
+                        <StackPanel>
+                            <CheckBox Content="Landliving" IsChecked="{Binding Landliving}" Margin="5, 5, 5, 5"
+                                  Visibility="{Binding LandlivingVisible, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                        <!--Arachnid specific input-->
+                        <StackPanel>
+                            <CheckBox Content="Venomous" IsChecked="{Binding Venomous}" Margin="5, 5, 5, 5"
+                                  Visibility="{Binding VenomousVisible, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                        <!--Bird specific input-->
+                        <StackPanel>
+                            <CheckBox Content="Migratory" IsChecked="{Binding Migratory}" Margin="5, 5, 5, 5"
+                                  Visibility="{Binding MigratoryVisible, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                        <!--Fish specific input-->
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Water type" Target="{Binding ElementName=waterTypeCombo}" VerticalAlignment="Center" Width="80"
+                                   Visibility="{Binding WaterTypeVisible, Converter={StaticResource BoolToVisibility}}"/>
+                            <ComboBox Name="waterTypeCombo" Width="120" SelectedItem="{Binding WaterType}" ItemsSource="{Binding WaterTypes}" DisplayMemberPath="."
+                                      Visibility="{Binding WaterTypeVisible, Converter={StaticResource BoolToVisibility}}"/>
+                        </StackPanel>
+                        <!--Insect specific input-->
+                        <StackPanel>
+                            <CheckBox Content="Can fly" IsChecked="{Binding CanFly}" Margin="5, 5, 5, 5"
+                                  Visibility="{Binding CanFlyVisible, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                        <!--Mammal specific input-->
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Number of legs" Target="{Binding ElementName=numberOfLegsTextBox}" Width="90"
+                                   Visibility="{Binding NumberOfLegsVisible, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBox Name="numberOfLegsTextBox" Text="{Binding NumberOfLegs}" Margin="5, 5, 5, 5" Width="100"
+                                 Visibility="{Binding NumberOfLegsVisible, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                        <!--Insect specific input-->
+                        <StackPanel>
+                            <CheckBox Content="Has scales" IsChecked="{Binding HasScales}" Margin="5, 5, 5, 5"
+                                  Visibility="{Binding HasScalesVisible, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Grid.Row="0">
+                        <!--Frog specific input-->
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Color" Target="{Binding ElementName=colorTextBox}" Width="90"
+                                   Visibility="{Binding ColorVisible, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBox Name="colorTextBox" Text="{Binding Color}" Margin="5, 5, 5, 5" Width="100"
+                                 Visibility="{Binding ColorVisible, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                        <!--Axolotl specific input-->
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Regeneration rate" Target="{Binding ElementName=regenerationRateTextBox}" Width="120"
+                                   Visibility="{Binding RegenerationRateVisible, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBox Name="regenerationRateTextBox" Text="{Binding Color}" Margin="5, 5, 5, 5" Width="70"
+                                 Visibility="{Binding RegenerationRateVisible, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                        <!--Spider specific input-->
+                        <StackPanel>
+                            <CheckBox Content="Web weaving" IsChecked="{Binding WebWeaving}" Margin="5, 5, 5, 5"
+                                  Visibility="{Binding WebWeavingVisible, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                        <!--Scorpion specific input-->
+                        <StackPanel>
+                            <CheckBox Content="Nocturnal" IsChecked="{Binding Nocturnal}" Margin="5, 5, 5, 5"
+                                  Visibility="{Binding NocturnalVisible, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                        <!--Raven specific input-->
+                        <StackPanel>
+                            <CheckBox Content="Has hatchling" IsChecked="{Binding HasHatchling}" Margin="5, 5, 5, 5"
+                                  Visibility="{Binding HasHatchlingVisible, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                        <!--Falcon specific input-->
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Diving speed" Target="{Binding ElementName=divingSpeedTextBox}" Width="120"
+                                   Visibility="{Binding DivingSpeedVisible, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBox Name="divingSpeedTextBox" Text="{Binding DivingSpeed}" Margin="5, 5, 5, 5" Width="70"
+                                 Visibility="{Binding DivingSpeedVisible, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                        <!--Salmon specific input-->
+                        <StackPanel>
+                            <CheckBox Content="Has been caught at least once" IsChecked="{Binding HasBeenCaught}" Margin="5, 5, 5, 5"
+                                  Visibility="{Binding HasBeenCaughtVisible, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                        <!--Shark specific input-->
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Number of gills" Target="{Binding ElementName=numberOfGillsTextBox}" Width="120"
+                                   Visibility="{Binding NumberOfGillsVisible, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBox Name="numberOfGillsTextBox" Text="{Binding NumberOfGills}" Margin="5, 5, 5, 5" Width="70"
+                                 Visibility="{Binding NumberOfGillsVisible, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                        <!--Bee specific input-->
+                        <StackPanel>
+                            <CheckBox Content="Solitary" IsChecked="{Binding Solitary}" Margin="5, 5, 5, 5"
+                                  Visibility="{Binding SolitaryVisible, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                        <!--Ladybug specific input-->
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Number of spots" Target="{Binding ElementName=numberOfSpotsTextBox}" Width="120"
+                                   Visibility="{Binding NumberOfSpotsVisible, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBox Name="numberOfSpotsTextBox" Text="{Binding NumberOfSpots}" Margin="5, 5, 5, 5" Width="70"
+                                 Visibility="{Binding NumberOfSpotsVisible, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                        <!--Cat specific input-->
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Breed" Target="{Binding ElementName=breedTextBox}" Width="90"
+                                   Visibility="{Binding BreedVisible, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBox Name="breedTextBox" Text="{Binding Breed}" Margin="5, 5, 5, 5" Width="100"
+                                 Visibility="{Binding BreedVisible, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                        <!--Elephant specific input-->
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Trunk length" Target="{Binding ElementName=trunkLengthTextBox}" Width="120"
+                                   Visibility="{Binding TrunkLengthVisible, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBox Name="trunkLengthTextBox" Text="{Binding TrunkLength}" Margin="5, 5, 5, 5" Width="70"
+                                 Visibility="{Binding TrunkLengthVisible, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                        <!--Snake specific input-->
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Hunting technique" Target="{Binding ElementName=huntingTechniqueCombo}" VerticalAlignment="Center" Width="80"
+                                   Visibility="{Binding HuntingTechniqueVisible, Converter={StaticResource BoolToVisibility}}"/>
+                            <ComboBox Name="huntingTechniqueCombo" Width="120" SelectedItem="{Binding HuntingTechnique}" ItemsSource="{Binding HuntingTechniques}" DisplayMemberPath="."
+                                      Visibility="{Binding HuntingTechniqueVisible, Converter={StaticResource BoolToVisibility}}"/>
+                        </StackPanel>
+                        <!--Tortoise specific input-->
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Max age in years" Target="{Binding ElementName=maxAgeInYearsTextBox}" Width="120"
+                                   Visibility="{Binding MaxAgeInYearsVisible, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBox Name="maxAgeInYearsTextBox" Text="{Binding MaxAgeInYears}" Margin="5, 5, 5, 5" Width="70"
+                                 Visibility="{Binding MaxAgeInYearsVisible, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+
+                    </StackPanel>
+
+                </Grid>
+
+                <Grid Margin="0,10,0,0" Height="150">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100*"/>
+                        <ColumnDefinition Width="10*"/>
+                        <ColumnDefinition Width="100*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Grid.Column="0" Grid.Row="0" Text="Class"/>
+                        <ListBox Name="categoriesListBox" Grid.Column="2" Grid.Row="0" Height="100" ItemsSource="{Binding AvailableCategories}" SelectedItem="{Binding SelectedCategory}" IsEnabled="{Binding IsCategoryEnabled}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Grid.Row="0">
+                        <TextBlock Grid.Column="2" Grid.Row="0" Text="Species"/>
+                        <ListBox Name="speciesListBox" Grid.Column="0" Grid.Row="0" Height="100" ItemsSource="{Binding AvailableSpecies}" SelectedItem="{Binding SelectedSpecies}"/>
+                    </StackPanel>
+
+                </Grid>
+
+                <CheckBox Content="List all animals" Command="{Binding ListAllAnimalsCommand}" IsChecked="{Binding IsListAllAnimalsChecked, Mode=TwoWay}"/>
+                <Button Content="Add" Width="150" Command="{Binding CreateAnimalCommand}"/>
+            </StackPanel>
+
+            <!-- Object output and image -->
+            <StackPanel Grid.Column="1" Margin="10,10,10,10">
+                <Button Content="Add Image" Width="150" Command="{Binding AddAnimalImageCommand}"/>
+                <Border Width="200" Height="200" BorderBrush="Gray" BorderThickness="1">
+                    <Image Source="{Binding AnimalImage}" Stretch="Fill"/>
+                </Border>
+                <TextBlock Text="Summary:" FontWeight="Bold" TextAlignment="Center"/>
+                <Border Width="200" Height="200" BorderBrush="Gray" BorderThickness="1">
+                    <TextBlock Text="{Binding SelectedAnimalInformation, Mode=OneWay, NotifyOnSourceUpdated=True}" Height="171" Width="200" />
+                </Border>
+                
+            </StackPanel>
+        </Grid>
+    </DockPanel>
+</Window>

@@ -13,7 +13,7 @@ namespace WTS.Models.Fish
             set { _habitat = value; }
         }
 
-        protected Fish(int id, int age, GenderType gender, string name, WaterHabitatType habitat)
+        protected Fish(string id, int age, GenderType gender, string name, WaterHabitatType habitat)
             : base(id, age, CategoryType.Fish, gender, name)
         {
             _habitat = habitat;

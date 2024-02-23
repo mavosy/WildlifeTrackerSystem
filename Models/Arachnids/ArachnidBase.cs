@@ -1,7 +1,7 @@
 ﻿using WTS.Enums;
 using WTS.Models.AnimalBase;
 
-namespace WTS.Models.Arachnid
+namespace WTS.Models.Arachnids
 {
     internal abstract class Arachnid : Animal
     {
@@ -13,7 +13,7 @@ namespace WTS.Models.Arachnid
             set { _venomous = value; }
         }
 
-        protected Arachnid(int id, int age, GenderType gender, string name, bool venomous)
+        protected Arachnid(string id, int age, GenderType gender, string name, bool venomous)
             : base(id, age, CategoryType.Arachnid, gender, name)
         {
             _venomous = venomous;

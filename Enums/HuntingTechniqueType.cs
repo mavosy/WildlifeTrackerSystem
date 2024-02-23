@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace WTS.Enums
+﻿namespace WTS.Enums
 {
+    /// <summary>
+    /// Enum representing the different hunting techniques of animals, mainly snakes.
+    /// </summary>
     enum HuntingTechniqueType
     {
         strangulation,
