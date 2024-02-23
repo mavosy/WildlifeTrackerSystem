@@ -13,7 +13,7 @@ namespace WTS.Models.Insects
             set { _canFly = value; }
         }
 
-        protected Insect(int id, int age,  GenderType gender, string name, bool canFly)
+        protected Insect(string id, int age, GenderType gender, string name, bool canFly)
             : base(id, age, CategoryType.Insect, gender, name)
         {
             _canFly = canFly;

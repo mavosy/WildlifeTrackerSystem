@@ -1,6 +1,6 @@
-﻿using System.Configuration;
-using System.Data;
-using System.Windows;
+﻿using System.Windows;
+using WTS.ViewModels;
+using WTS.Views;
 
 namespace WTS
 {
@@ -9,6 +9,6 @@ namespace WTS
     /// </summary>
     public partial class App : Application
     {
-    }
 
+    }
 }

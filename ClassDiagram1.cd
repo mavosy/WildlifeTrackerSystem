@@ -14,5 +14,19 @@
       <FileName>Models\Fish\Salmon.cs</FileName>
     </TypeIdentifier>
   </Class>
+  <Class Name="WTS.Models.Arachnid.Arachnid" Collapsed="true">
+    <Position X="1.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAgAAAAAAAAA=</HashCode>
+      <FileName>Models\Arachnid\ArachnidBase.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WTS.Models.Arachnid.Spider" Collapsed="true">
+    <Position X="1.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAABAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\Arachnid\Spider.cs</FileName>
+    </TypeIdentifier>
+  </Class>
   <Font Name="Segoe UI" Size="9" />
 </ClassDiagram>

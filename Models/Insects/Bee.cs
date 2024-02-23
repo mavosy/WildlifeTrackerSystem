@@ -1,26 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WTS.Enums;
+﻿using WTS.Enums;
 
 namespace WTS.Models.Insects
 {
-    internal class Bee : Insect
+    internal class Bee(string id, int age, GenderType gender, string name, bool canFly, bool solitary) : Insect(id, age, gender, name, canFly)
     {
-        private bool _isSolitary;
-
-        public bool IsSolitary
+        private bool _solitary = solitary;
+        public bool Solitary
         {
-            get { return _isSolitary; }
-            set { _isSolitary = value; }
-        }
-
-        public Bee(int id, int age, GenderType gender, string name, bool canFly, bool isSolitary)
-            : base(id, age, gender, name, canFly)
-        {
-            _isSolitary = isSolitary;
+            get { return _solitary; }
+            set { _solitary = value; }
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using WTS.Enums;
+﻿using WTS.Enums;
 using WTS.Models.AnimalBase;
 
 namespace WTS.Models.Mammals
@@ -14,7 +13,7 @@ namespace WTS.Models.Mammals
             set { _numberOfLegs = value; }
         }
 
-        protected Mammal(string name, int id, int age, GenderType gender, int numberOfLegs)
+        protected Mammal(string name, string id, int age, GenderType gender, int numberOfLegs)
             : base(id, age, CategoryType.Mammal, gender, name)
         {
             _numberOfLegs = numberOfLegs;
