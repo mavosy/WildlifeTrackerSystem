@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32;
-using PropertyChanged;
+﻿using PropertyChanged;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows.Input;
@@ -15,6 +14,7 @@ using WTS.Models.Fish;
 using WTS.Models.Insects;
 using WTS.Models.Mammals;
 using WTS.Models.Reptiles;
+using WTS.Services.Interfaces;
 using WTS.Utilities;
 
 namespace WTS.ViewModels
@@ -42,6 +42,8 @@ namespace WTS.ViewModels
         private const string Snake = "Snake";
         private const string Tortoise = "Tortoise";
 
+        private readonly IFileService _fileService;
+
         // Private fields
         private readonly Dictionary<CategoryType, List<string>> _categoryToSpeciesMap;
         private readonly Dictionary<string, Func<Animal>> _speciesCreationMap;
@@ -54,8 +56,11 @@ namespace WTS.ViewModels
         /// <summary>
         /// Constructor of WTSViewModel, initializes a new instance of the WTSViewModel class.
         /// </summary>
-        public WTSViewModel()
+        public WTSViewModel(IFileService fileService)
         {
+            _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
+
+
             _categoryToSpeciesMap = InitializeCategoryToSpeciesMap();
             _speciesCreationMap = InitializeSpeciesCreationMap();
             _speciesVisibilityMap = InitializeSpeciesVisibilityMap();
@@ -80,7 +85,7 @@ namespace WTS.ViewModels
 
                 if (!IsListAllAnimalsChecked)
                 {
-                    UpdateAvailableSpeciesForCategory(); 
+                    UpdateAvailableSpeciesForCategory();
                 }
             }
         }
@@ -113,10 +118,10 @@ namespace WTS.ViewModels
         public string AgeText
         {
             get { return _ageText; }
-            set 
-            { 
-                _ageText = value; 
-                if(int.TryParse(value, out int age))
+            set
+            {
+                _ageText = value;
+                if (int.TryParse(value, out int age))
                 {
                     Age = age;
                 }
@@ -201,7 +206,7 @@ namespace WTS.ViewModels
         private void InitializeCommands()
         {
             CreateAnimalCommand = new RelayCommand(_ => CreateAnimal());
-            ListAllAnimalsCommand = new RelayCommand(_ => OnListAllAnimalsCheckedChanged());
+            ListAllAnimalsCommand = new RelayCommand(_ => OnIsListAllAnimalsCheckedChanged());
             AddAnimalImageCommand = new RelayCommand(_ => DisplayImage());
         }
 
@@ -504,7 +509,7 @@ namespace WTS.ViewModels
         {
             if (SelectedAnimal is not null)
             {
-                return ObjectInspectionHelper.GetPropertiesToString(SelectedAnimal);
+                return ObjectInspector.GetPropertiesToString(SelectedAnimal);
             }
             else
             {
@@ -523,7 +528,7 @@ namespace WTS.ViewModels
         /// <summary>
         /// Updates the available species when the 'List All Animals' checkbox is checked or unchecked.
         /// </summary>
-        public void OnListAllAnimalsCheckedChanged()
+        public void OnIsListAllAnimalsCheckedChanged()
         {
             if (IsListAllAnimalsChecked)
             {
@@ -554,27 +559,19 @@ namespace WTS.ViewModels
         }
 
         /// <summary>
-        /// Converts a file by filepath to a BitmapImage.
-        /// </summary>
-        public BitmapImage FileToBitmapImage(string filePath)
-        {
-            return new BitmapImage(new Uri(filePath, UriKind.RelativeOrAbsolute));
-        }
-
-        /// <summary>
         /// Sets property AnimalImage to the image chosen by the user.
         /// </summary>
-        private void DisplayImage() => AnimalImage = FileToBitmapImage(OpenFileDialog(ImageFilters));
-
-        /// <summary>
-        /// Opens a file dialog for the user to select a file based on the filters.
-        /// </summary>
-        /// <param name="filter">File filters as strings</param>
-        /// <returns>Filepath to the chosen file</returns>
-        public string OpenFileDialog(string filter)
+        private void DisplayImage()
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog { Filter = filter };
-            return openFileDialog.ShowDialog() == true ? openFileDialog.FileName : null;
+            try
+            {
+                string filePath = _fileService.OpenFileDialog(ImageFilters);
+                AnimalImage = _fileService.FileToBitmapImage(filePath);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error while setting image: {ex}");
+            }
         }
     }
 }
