@@ -5,7 +5,7 @@ namespace WTS.Utilities
     /// <summary>
     /// Provides utility methods for inspecting objects with reflection.
     /// </summary>
-    public static class ObjectInspectionHelper
+    public static class ObjectInspector
     {
         /// <summary>
         /// Defines the order in which general properties should be written.

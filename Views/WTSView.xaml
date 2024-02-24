@@ -8,10 +8,7 @@
         d:DataContext="{d:DesignInstance {x:Type vm:WTSViewModel}}"     
         mc:Ignorable="d"
         Title="WildlifeTracker" Height="600" Width="750">
-    <!--Data context = ViewModel. Makes bindings and MVVM work-->
-    <Window.DataContext>
-        <vm:WTSViewModel/>
-    </Window.DataContext>
+
     <!--IValueConverter to toggle the visibility of input controllers with a boolean flag-->
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
