@@ -2,14 +2,19 @@
 
 namespace WTS.Models.Reptiles
 {
-    internal class Snake(string id, int age, GenderType gender, string name, bool hasScales, HuntingTechniqueType huntingTechnique) : Reptile(id, age, gender, name, hasScales)
+    internal class Snake : Reptile
     {
-        private HuntingTechniqueType _huntingTechnique = huntingTechnique;
-
-        public HuntingTechniqueType HuntingTechnique
+        public Snake(string id, string? name, int? age, GenderType gender, bool hasScales, HuntingTechniqueType huntingTechnique) 
+            : base(id, name, age, gender, hasScales)
         {
-            get { return _huntingTechnique; }
-            set { _huntingTechnique = value; }
+            HuntingTechnique = huntingTechnique;
+        }
+
+        public HuntingTechniqueType HuntingTechnique { get; set; }
+
+        public override string ToString()
+        {
+            return $"{base.ToString()}, Hunting technique: {HuntingTechnique}";
         }
     }
 }

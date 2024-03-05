@@ -5,18 +5,17 @@ namespace WTS.Models.Arachnids
 {
     internal abstract class Arachnid : Animal
     {
-        private bool _venomous;
-
-        public bool Venomous
+        protected Arachnid(string id, string? name, int? age, GenderType gender, bool venomous)
+            : base(id, CategoryType.Arachnid, gender, name, age)
         {
-            get { return _venomous; }
-            set { _venomous = value; }
+            Venomous = venomous;
         }
 
-        protected Arachnid(string id, int age, GenderType gender, string name, bool venomous)
-            : base(id, age, CategoryType.Arachnid, gender, name)
+        protected bool Venomous { get; set; }
+
+        public override string ToString()
         {
-            _venomous = venomous;
+            return $"{base.ToString()}, Venomous: {Venomous}";
         }
     }
 }

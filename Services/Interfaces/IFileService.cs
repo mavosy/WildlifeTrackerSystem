@@ -4,7 +4,7 @@ namespace WTS.Services.Interfaces
 {
     internal interface IFileService
     {
-        public string OpenFileDialog(string filter);
+        public string? OpenFileDialog(string filter);
 
         public BitmapImage FileToBitmapImage(string filePath);
     }

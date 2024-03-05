@@ -2,13 +2,19 @@
 
 namespace WTS.Models.Fish
 {
-    internal class Salmon(string id, int age, GenderType gender, string name, WaterHabitatType habitat, bool numberOfGills) : Fish(id, age, gender, name, habitat)
+    internal class Salmon : Fish
     {
-        private bool _hasBeenCaught = numberOfGills;
-        public bool NumberOfGills
+        public Salmon(string id, string? name, int? age, GenderType gender, WaterHabitatType habitat, bool hasBeenCaught) 
+            : base(id, name, age, gender, habitat)
         {
-            get { return _hasBeenCaught; }
-            set { _hasBeenCaught = value; }
+            HasBeenCaught = hasBeenCaught;
         }
+
+        public bool HasBeenCaught { get; set; }
+        public override string ToString()
+        {
+            return $"{base.ToString()}, Has been caught: {HasBeenCaught}";
+        }
+
     }
 }

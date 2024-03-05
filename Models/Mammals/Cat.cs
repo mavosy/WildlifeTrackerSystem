@@ -1,14 +1,23 @@
-﻿using WTS.Enums;
+﻿using System.ComponentModel.DataAnnotations;
+using WTS.Enums;
 
 namespace WTS.Models.Mammals
 {
-    internal class Cat(string id, int age, GenderType gender, string name, int numberOfLegs, string breed) : Mammal(name, id, age, gender, numberOfLegs)
+    internal class Cat : Mammal
     {
-        private string _breed = breed;
-        public string Breed
+        public Cat(string id, string? name, int? age, GenderType gender, int numberOfLegs, string breed) 
+            : base(id, name, age, gender, numberOfLegs)
         {
-            get { return _breed; }
-            set { _breed = value; }
+            Breed = breed;
+        }
+
+        [Required(ErrorMessage = "This information is required")]
+        [StringLength(50,ErrorMessage = "Breed must be 50 characters or less")]
+        public string Breed { get; set; }
+
+        public override string ToString()
+        {
+            return $"{base.ToString()}, Breed: {Breed}";
         }
     }
 }

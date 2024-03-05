@@ -2,13 +2,19 @@
 
 namespace WTS.Models.Arachnids
 {
-    internal class Scorpion(string id, int age, GenderType gender, string name, bool venomous, bool nocturnal) : Arachnid(id, age, gender, name, venomous)
+    internal class Scorpion : Arachnid
     {
-        private bool _nocturnal = nocturnal;
-        public bool Nocturnal
+        public Scorpion(string id, string? name, int? age, GenderType gender, bool venomous, bool nocturnal) 
+            : base(id, name, age, gender, venomous)
         {
-            get { return _nocturnal; }
-            set { _nocturnal = value; }
+            Nocturnal = nocturnal;
+        }
+
+        public bool Nocturnal { get; set; }
+
+        public override string ToString()
+        {
+            return $"{base.ToString()}, Nocturnal: {Nocturnal}";
         }
     }
 }

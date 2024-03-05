@@ -1,22 +1,23 @@
-﻿using WTS.Enums;
+﻿using System.ComponentModel.DataAnnotations;
+using WTS.Enums;
 using WTS.Models.AnimalBase;
 
 namespace WTS.Models.Fish
 {
     internal abstract class Fish : Animal
     {
-        private WaterHabitatType _habitat;
-
-        public WaterHabitatType Habitat
+        protected Fish(string id, string? name, int? age, GenderType gender, WaterHabitatType habitat)
+            : base(id, CategoryType.Fish, gender, name, age)
         {
-            get { return _habitat; }
-            set { _habitat = value; }
+            Habitat = habitat;
         }
 
-        protected Fish(string id, int age, GenderType gender, string name, WaterHabitatType habitat)
-            : base(id, age, CategoryType.Fish, gender, name)
+        [Required(ErrorMessage = "This information is required")]
+        protected WaterHabitatType Habitat { get; set; }
+
+        public override string ToString()
         {
-            _habitat = habitat;
+            return $"{base.ToString()}, Habitat: {Habitat}";
         }
     }
 }

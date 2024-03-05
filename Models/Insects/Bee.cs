@@ -2,13 +2,19 @@
 
 namespace WTS.Models.Insects
 {
-    internal class Bee(string id, int age, GenderType gender, string name, bool canFly, bool solitary) : Insect(id, age, gender, name, canFly)
+    internal class Bee : Insect
     {
-        private bool _solitary = solitary;
-        public bool Solitary
+        public Bee(string id, string? name, int? age, GenderType gender, bool canFly, bool solitary) 
+            : base(id, name, age, gender, canFly)
         {
-            get { return _solitary; }
-            set { _solitary = value; }
+            Solitary = solitary;
+        }
+
+        public bool Solitary { get; set; }
+
+        public override string ToString()
+        {
+            return $"{base.ToString()}, Solitary: {Solitary}";
         }
     }
 }

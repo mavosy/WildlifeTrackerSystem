@@ -2,13 +2,19 @@
 
 namespace WTS.Models.Birds
 {
-    internal class Raven(string id, int age, GenderType gender, string name, bool migratory, bool hasHatchling) : Bird(id, age, gender, name, migratory)
+    internal class Raven : Bird
     {
-        private bool _hasHatchling = hasHatchling;
-        public bool HasHatchling
+        public Raven(string id, string? name, int? age, GenderType gender, bool migratory, bool hasHatchling) 
+            : base(id, name, age, gender, migratory)
         {
-            get { return _hasHatchling; }
-            set { _hasHatchling = value; }
+            HasHatchling = hasHatchling;
+        }
+
+        public bool HasHatchling { get; set; }
+
+        public override string ToString()
+        {
+            return $"{base.ToString()}, Has hatchling: {HasHatchling}";
         }
     }
 }
