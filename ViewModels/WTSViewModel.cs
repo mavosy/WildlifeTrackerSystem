@@ -248,7 +248,7 @@ namespace WTS.ViewModels
 
         #region Animal properties mirroring Model Layer
 
-        //Animal properties mirroring Model Layer
+        //Animal properties, most are bound to UI and transfered to constructor at moment of Animal object creation
 
         // Animal
         public Animal Animal { get; set; }
