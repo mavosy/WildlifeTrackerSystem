@@ -1,14 +1,26 @@
-﻿using WTS.Enums;
+﻿using System.ComponentModel.DataAnnotations;
+using WTS.Enums;
 
 namespace WTS.Models.Birds
 {
-    internal class Falcon(string id, int age, GenderType gender, string name, bool migratory, int divingSpeed) : Bird(id, age, gender, name, migratory)
+    internal class Falcon : Bird
     {
-        private int _divingSpeed = divingSpeed;
-        public int DivingSpeed
+        public Falcon(string id, string? name, int? age, GenderType gender, bool migratory, int divingSpeed) 
+            : base(id, name, age, gender, migratory)
         {
-            get { return _divingSpeed; }
-            set { _divingSpeed = value; }
+            DivingSpeed = divingSpeed;
+        }
+
+        /// <summary>
+        /// Top speed while diving, in km/h
+        /// </summary>
+        [Required(ErrorMessage = "This information is required")]
+        [Range(0, 400, ErrorMessage = "Must be between 0 and 400")]
+        public int DivingSpeed { get; set; }
+
+        public override string ToString()
+        {
+            return $"{base.ToString()}, Diving speed: {DivingSpeed}";
         }
     }
 }

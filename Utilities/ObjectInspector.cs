@@ -66,10 +66,8 @@ namespace WTS.Utilities
                         propertyWriter.WriteLine($"{property.Name.PadRight(15)}: [Error retrieving value]");
                     }
                 }
-
             }
             return propertyWriter.ToString();
-
         }
     }
 }

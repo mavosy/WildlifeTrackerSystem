@@ -1,22 +1,46 @@
-﻿using WTS.Enums;
+﻿using System.Text;
+using WTS.Enums;
 using WTS.Models.AnimalBase;
+using WTS.Utilities;
 
 namespace WTS.Models.Amphibians
 {
     internal abstract class Amphibian : Animal
     {
-        private bool _landliving;
-
-        protected bool Landliving
+        protected Amphibian(string id, string? name, int? age, GenderType gender, bool landliving)
+            : base(id, CategoryType.Amphibian, gender, name, age)
         {
-            get { return _landliving; }
-            set { _landliving = value; }
+            Landliving = landliving;
         }
 
-        protected Amphibian(string id, int age, GenderType gender, string name, bool landliving)
-            : base(id, age, CategoryType.Amphibian, gender, name)
+        protected bool Landliving { get; set; }
+
+        public override IEnumerable<KeyValuePair<string, ValueWrapper>> GetPropertiesAsKeyValuePairs()
         {
-            _landliving = landliving;
+            foreach (KeyValuePair<string, ValueWrapper> keyValuePair in base.GetPropertiesAsKeyValuePairs())
+            {
+                yield return keyValuePair;
+            }
+            yield return new KeyValuePair<string, ValueWrapper>("LandLiving", ValueWrapper.Create(Landliving));
         }
+
+
+
+        //public override string ToString()
+        //{
+        //    return 
+        //        $"{base.ToString()}\n" +
+        //        $"LandLiving:\t{Landliving}";
+        //}
+
+        //public override string ToString()
+        //{
+        //    var builder = new StringBuilder();
+
+        //    builder.AppendLine(base.ToString());
+        //    builder.AppendLine($"LandLiving:\t{Landliving}");
+
+        //    return builder.ToString();
+        //}
     }
 }

@@ -3,16 +3,20 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:conv="clr-namespace:WTS.Converters"
         xmlns:local="clr-namespace:WTS.Views"
         xmlns:vm="clr-namespace:WTS.ViewModels"
-        d:DataContext="{d:DesignInstance {x:Type vm:WTSViewModel}}"     
+        d:DataContext="{d:DesignInstance {x:Type vm:WTSViewModel}}"
         mc:Ignorable="d"
         Title="WildlifeTracker" Height="600" Width="750">
+
 
     <!--IValueConverter to toggle the visibility of input controllers with a boolean flag-->
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
-    </Window.Resources>
+        <conv:DebugConverter x:Key="DebugConverter" />
+        <conv:ValidationErrorNullConverter x:Key="ValidationErrorNullConverter" />
+    </Window.Resources> 
 
     <DockPanel>
         <Grid DockPanel.Dock="Top" Margin="20">
@@ -27,12 +31,17 @@
                 <StackPanel Orientation="Horizontal">
                     <!--Name input-->
                     <Label Content="Name" Target="{Binding ElementName=nameTextBox}" VerticalAlignment="Center" Width="80"/>
-                    <TextBox Name="nameTextBox" Width="150" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBox Name="nameTextBox" Width="150" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}">
+                        <TextBox.ToolTip>
+                            <ToolTip Content="{Binding (Validation.Errors), RelativeSource={RelativeSource Self}, Converter={StaticResource ValidationErrorNullConverter}}" 
+                                        IsEnabled="{Binding (Validation.HasError), RelativeSource={RelativeSource Self}}"/>
+                        </TextBox.ToolTip>
+                    </TextBox>
                 </StackPanel>
                 <!--Age input-->
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Age" Target="{Binding ElementName=ageTextBox}" VerticalAlignment="Center" Width="80"/>
-                    <TextBox Name="ageTextBox" Width="150" Text="{Binding AgeText, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBox Name="ageTextBox" Width="150" Text="{Binding Age, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"/>
                 </StackPanel>
                 <!--Gender input-->
                 <StackPanel Orientation="Horizontal">
@@ -222,8 +231,24 @@
                 </Border>
                 <TextBlock Text="Summary:" FontWeight="Bold" TextAlignment="Center"/>
                 <Border Width="200" Height="200" BorderBrush="Gray" BorderThickness="1">
+                    <ItemsControl ItemsSource="{Binding AnimalInformation}" Grid.IsSharedSizeScope="True">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="90" SharedSizeGroup="KeyColumn" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Key}" Grid.Column="0" Padding="5" />
+                                    <TextBlock Text="{Binding Value}" Grid.Column="1" Padding="5" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>                
+                <!--<Border Width="200" Height="200" BorderBrush="Gray" BorderThickness="1">
                     <TextBlock Text="{Binding SelectedAnimalInformation, Mode=OneWay, NotifyOnSourceUpdated=True}" Height="171" Width="200" />
-                </Border>
+                </Border>-->
                 
             </StackPanel>
         </Grid>

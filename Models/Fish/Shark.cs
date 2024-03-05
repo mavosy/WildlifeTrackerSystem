@@ -1,14 +1,23 @@
-﻿using WTS.Enums;
+﻿using System.ComponentModel.DataAnnotations;
+using WTS.Enums;
 
 namespace WTS.Models.Fish
 {
-    internal class Shark(string id, int age, GenderType gender, string name, WaterHabitatType habitat, int numberOfGills) : Fish(id, age, gender, name, habitat)
+    internal class Shark : Fish
     {
-        private int _numberOfGills = numberOfGills;
-        public int HasBeenCaught
+        public Shark(string id, string? name, int? age, GenderType gender, WaterHabitatType habitat, int numberOfGills) 
+            : base(id, name, age, gender, habitat)
         {
-            get { return _numberOfGills; }
-            set { _numberOfGills = value; }
+            NumberOfGills = numberOfGills;
+        }
+
+        [Required(ErrorMessage = "This information is required")]
+        [Range(0, 7, ErrorMessage = "Must be between 0 and 7")]
+        public int NumberOfGills { get; set; }
+
+        public override string ToString()
+        {
+            return $"{base.ToString()}, Number of gills: {NumberOfGills}";
         }
     }
 }

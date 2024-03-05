@@ -26,7 +26,7 @@ namespace WTS.Services
         /// </summary>
         /// <param name="filter">File filters as strings</param>
         /// <returns>Filepath to the chosen file</returns>
-        public string OpenFileDialog(string filter)
+        public string? OpenFileDialog(string filter)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog { Filter = filter };
             return openFileDialog.ShowDialog() == true ? openFileDialog.FileName : null;

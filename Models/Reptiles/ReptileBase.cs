@@ -5,18 +5,17 @@ namespace WTS.Models.Reptiles
 {
     internal abstract class Reptile : Animal
     {
-        private bool _hasScales;
-
-        public bool HasScales
+        protected Reptile(string id, string? name, int? age, GenderType gender, bool hasScales)
+            : base(id, CategoryType.Reptile, gender, name, age)
         {
-            get { return _hasScales; }
-            set { _hasScales = value; }
+            HasScales = hasScales;
         }
 
-        protected Reptile(string id, int age, GenderType gender, string name, bool hasScales)
-            : base(id, age, CategoryType.Reptile, gender, name)
+        protected bool HasScales { get; set; }
+
+        public override string ToString()
         {
-            _hasScales = hasScales;
+            return $"{base.ToString()}, Has scales: {HasScales}";
         }
     }
 }

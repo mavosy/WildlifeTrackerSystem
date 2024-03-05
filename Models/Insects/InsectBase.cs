@@ -5,18 +5,17 @@ namespace WTS.Models.Insects
 {
     internal abstract class Insect : Animal
     {
-        private bool _canFly;
-
-        public bool CanFly
+        protected Insect(string id, string? name, int? age, GenderType gender,  bool canFly)
+            : base(id, CategoryType.Insect, gender, name, age)
         {
-            get { return _canFly; }
-            set { _canFly = value; }
+            CanFly = canFly;
         }
 
-        protected Insect(string id, int age, GenderType gender, string name, bool canFly)
-            : base(id, age, CategoryType.Insect, gender, name)
+        protected bool CanFly { get; set; }
+
+        public override string ToString()
         {
-            _canFly = canFly;
+            return $"{base.ToString()}, Can fly: {CanFly}";
         }
     }
 }

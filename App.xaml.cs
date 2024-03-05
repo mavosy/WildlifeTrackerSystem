@@ -17,6 +17,7 @@ namespace WTS
         private void ConfigureServices(IServiceCollection services)
         {
             services.AddTransient<IFileService, FileService>();
+
             services.AddTransient<WTSViewModel>();
         }
 

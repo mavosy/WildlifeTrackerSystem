@@ -2,13 +2,19 @@
 
 namespace WTS.Models.Arachnids
 {
-    internal class Spider(string id, int age, GenderType gender, string name, bool venomous, bool webWeaving) : Arachnid(id, age, gender, name, venomous)
+    internal class Spider : Arachnid
     {
-        private bool _webWeaving = webWeaving;
-        public bool WebWeaving
+        public Spider(string id, string? name, int? age, GenderType gender, bool venomous, bool webWeaving) 
+            : base(id, name, age, gender, venomous)
         {
-            get { return _webWeaving; }
-            set { _webWeaving = value; }
+            WebWeaving = webWeaving;
+        }
+
+        public bool WebWeaving { get; set; }
+
+        public override string ToString()
+        {
+            return $"{base.ToString()}, Web weaving: {WebWeaving}";
         }
     }
 }
