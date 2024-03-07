@@ -3,7 +3,7 @@ using WTS.Utilities;
 
 namespace WTS.Models.Amphibians
 {
-    internal class Frog : Amphibian
+    public class Frog : Amphibian
     {
         public Frog(string id, string? name, int? age, GenderType gender, bool landliving, string color)
             : base(id, name, age, gender, landliving)

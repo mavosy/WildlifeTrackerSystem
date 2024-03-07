@@ -4,7 +4,7 @@ using WTS.Services.Interfaces;
 
 namespace WTS.Services
 {
-    internal class FileService : IFileService
+    public class FileService : IFileService
     {
         /// <summary>
         /// Converts a file by filepath to a BitmapImage.

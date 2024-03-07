@@ -3,7 +3,7 @@ using WTS.Utilities;
 
 namespace WTS.Models.Amphibians
 {
-    internal class Axolotl : Amphibian
+    public class Axolotl : Amphibian
     {
         public Axolotl(string id, string? name, int? age, GenderType gender, bool landliving, double regenerationRate)
             : base(id, name, age, gender, landliving)
