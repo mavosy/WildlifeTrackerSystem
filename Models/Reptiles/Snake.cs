@@ -1,10 +1,11 @@
 ﻿using WTS.Enums;
+using WTS.Utilities;
 
 namespace WTS.Models.Reptiles
 {
     internal class Snake : Reptile
     {
-        public Snake(string id, string? name, int? age, GenderType gender, bool hasScales, HuntingTechniqueType huntingTechnique) 
+        public Snake(string id, string? name, int? age, GenderType gender, bool hasScales, HuntingTechniqueType huntingTechnique = HuntingTechniqueType.Unknown) 
             : base(id, name, age, gender, hasScales)
         {
             HuntingTechnique = huntingTechnique;
@@ -12,9 +13,13 @@ namespace WTS.Models.Reptiles
 
         public HuntingTechniqueType HuntingTechnique { get; set; }
 
-        public override string ToString()
+        public override IEnumerable<KeyValuePair<string, ValueWrapper>> GetPropertiesAsKeyValuePairs()
         {
-            return $"{base.ToString()}, Hunting technique: {HuntingTechnique}";
+            foreach (KeyValuePair<string, ValueWrapper> keyValuePair in base.GetPropertiesAsKeyValuePairs())
+            {
+                yield return keyValuePair;
+            }
+            yield return new KeyValuePair<string, ValueWrapper>("SelectedHuntingTechnique", ValueWrapper.Create(HuntingTechnique));
         }
     }
 }

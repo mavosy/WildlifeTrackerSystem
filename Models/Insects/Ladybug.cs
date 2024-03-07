@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using WTS.Enums;
+using WTS.Utilities;
 
 namespace WTS.Models.Insects
 {
@@ -15,9 +16,13 @@ namespace WTS.Models.Insects
         [Range(0, 24, ErrorMessage = "Must be between 0 and 24")]
         public int NumberOfSpots { get; set; }
 
-        public override string ToString()
+        public override IEnumerable<KeyValuePair<string, ValueWrapper>> GetPropertiesAsKeyValuePairs()
         {
-            return $"{base.ToString()}, Number of spots: {NumberOfSpots}";
+            foreach (KeyValuePair<string, ValueWrapper> keyValuePair in base.GetPropertiesAsKeyValuePairs())
+            {
+                yield return keyValuePair;
+            }
+            yield return new KeyValuePair<string, ValueWrapper>("NumberOfSpots", ValueWrapper.Create(NumberOfSpots));
         }
     }
 }

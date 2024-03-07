@@ -1,4 +1,5 @@
 ﻿using WTS.Enums;
+using WTS.Utilities;
 
 namespace WTS.Models.Fish
 {
@@ -11,10 +12,13 @@ namespace WTS.Models.Fish
         }
 
         public bool HasBeenCaught { get; set; }
-        public override string ToString()
+        public override IEnumerable<KeyValuePair<string, ValueWrapper>> GetPropertiesAsKeyValuePairs()
         {
-            return $"{base.ToString()}, Has been caught: {HasBeenCaught}";
+            foreach (KeyValuePair<string, ValueWrapper> keyValuePair in base.GetPropertiesAsKeyValuePairs())
+            {
+                yield return keyValuePair;
+            }
+            yield return new KeyValuePair<string, ValueWrapper>("HasBeenCaught", ValueWrapper.Create(HasBeenCaught));
         }
-
     }
 }

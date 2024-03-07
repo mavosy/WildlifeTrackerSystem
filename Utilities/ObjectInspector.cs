@@ -33,7 +33,6 @@ namespace WTS.Utilities
             using var propertyWriter = new StringWriter();
             var properties = animal.GetType().GetProperties();
 
-
             foreach (var propertyName in GeneralPropertiesOrder)
             {
                 var property = animal.GetType().GetProperty(propertyName);
@@ -50,7 +49,6 @@ namespace WTS.Utilities
                     }
                 }
             }
-
 
             foreach (var property in properties)
             {

@@ -6,7 +6,6 @@ namespace WTS.Models.Amphibians
 {
     internal class Frog : Amphibian
     {
-
         public Frog(string id, string? name, int? age, GenderType gender, bool landliving, string color) 
             : base(id, name, age, gender, landliving)
         {
@@ -25,12 +24,5 @@ namespace WTS.Models.Amphibians
             }
             yield return new KeyValuePair<string, ValueWrapper>("Color", ValueWrapper.Create(Color));
         }
-
-        //public override string ToString()
-        //{
-        //    return 
-        //        $"{base.ToString()}\n" +
-        //        $"Color: {Color}";
-        //}
     }
 }

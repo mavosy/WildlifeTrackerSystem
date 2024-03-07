@@ -1,4 +1,5 @@
 ﻿using WTS.Enums;
+using WTS.Utilities;
 
 namespace WTS.Models.Insects
 {
@@ -12,9 +13,13 @@ namespace WTS.Models.Insects
 
         public bool Solitary { get; set; }
 
-        public override string ToString()
+        public override IEnumerable<KeyValuePair<string, ValueWrapper>> GetPropertiesAsKeyValuePairs()
         {
-            return $"{base.ToString()}, Solitary: {Solitary}";
+            foreach (KeyValuePair<string, ValueWrapper> keyValuePair in base.GetPropertiesAsKeyValuePairs())
+            {
+                yield return keyValuePair;
+            }
+            yield return new KeyValuePair<string, ValueWrapper>("Solitary", ValueWrapper.Create(Solitary));
         }
     }
 }

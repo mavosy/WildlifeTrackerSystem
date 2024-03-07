@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using WTS.Enums;
+using WTS.Utilities;
 
 namespace WTS.Models.Reptiles
 {
@@ -15,9 +16,13 @@ namespace WTS.Models.Reptiles
         [Range(0, 200, ErrorMessage = "Must be between 0 and 200")]
         public int MaxAgeInYears { get; set; }
 
-        public override string ToString()
+        public override IEnumerable<KeyValuePair<string, ValueWrapper>> GetPropertiesAsKeyValuePairs()
         {
-            return $"{base.ToString()}, Max age: {MaxAgeInYears}";
+            foreach (KeyValuePair<string, ValueWrapper> keyValuePair in base.GetPropertiesAsKeyValuePairs())
+            {
+                yield return keyValuePair;
+            }
+            yield return new KeyValuePair<string, ValueWrapper>("MaxAgeInYears", ValueWrapper.Create(MaxAgeInYears));
         }
     }
 }

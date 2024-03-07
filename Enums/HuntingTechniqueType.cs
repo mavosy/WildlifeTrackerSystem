@@ -5,7 +5,8 @@
     /// </summary>
     enum HuntingTechniqueType
     {
-        strangulation,
-        venom,
+        Strangulation,
+        Venom,
+        Unknown
     }
 }

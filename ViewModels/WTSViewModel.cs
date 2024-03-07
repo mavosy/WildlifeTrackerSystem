@@ -1,8 +1,8 @@
-﻿using PropertyChanged;
+﻿using FluentValidation;
+using PropertyChanged;
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -21,10 +21,8 @@ using WTS.Models.Mammals;
 using WTS.Models.Reptiles;
 using WTS.Services.Interfaces;
 using WTS.Utilities;
-// TODO Continue with validation errors. When a minus is used in age field it gives arror, 
-// but when removed (age is nullable) its still showing error. Also restrict all signs to not allow injection etc.
-// also check if tooltip works, and test validation thoroughly.
-// Also throw away trash code in VM. ObserverInsepctor and a lot more.
+using WTS.Validators;
+
 namespace WTS.ViewModels
 {
     /// <summary>
@@ -50,27 +48,42 @@ namespace WTS.ViewModels
         private const string Snake = "Snake";
         private const string Tortoise = "Tortoise";
 
-        // Private fields
+        // Dependency Injection fields
         private readonly IFileService _fileService;
+        private readonly GeneralAnimalValidator _generalAnimalValidator;
 
+        // Dictionary fields
         private readonly Dictionary<CategoryType, List<string>> _categoryToSpeciesMap;
         private readonly Dictionary<string, Func<Animal>> _speciesCreationMap;
 
         private readonly Dictionary<CategoryType, Action> _categoryVisibilityMap;
         private readonly Dictionary<string, Action> _speciesVisibilityMap;
 
-        private readonly Dictionary<string, List<string>> _validationErrorsMap;
+        private readonly Dictionary<string, List<string>?> _validationErrorsMap;
 
+        // Property fields
         private CategoryType _selectedCategory;
         private string _selectedSpecies;
-        private Animal selectedAnimal;
+        private Animal _selectedAnimal;
+        private string? name;
+        private int? age;
+        private string color;
+        private double regenerationRate;
+        private int divingSpeed;
+        private int numberOfGills;
+        private int numberOfSpots;
+        private int numberOfLegs;
+        private string breed;
+        private int trunkLength;
+        private int maxAgeInYears;
 
         /// <summary>
         /// Constructor of WTSViewModel, initializes a new instance of the WTSViewModel class.
         /// </summary>
-        public WTSViewModel(IFileService fileService)
+        public WTSViewModel(IFileService fileService, GeneralAnimalValidator generalAnimalValidator)
         {
             _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
+            _generalAnimalValidator = generalAnimalValidator ?? throw new ArgumentNullException(nameof(generalAnimalValidator));
 
             _categoryToSpeciesMap = InitializeCategoryToSpeciesMap();
             _speciesCreationMap = InitializeSpeciesCreationMap();
@@ -80,12 +93,14 @@ namespace WTS.ViewModels
 
             _validationErrorsMap = InitializeValidationErrorMap();
 
-            AvailableSpecies = new ObservableCollection<string>();
-            Animals = new ObservableCollection<Animal>();
-            AnimalInformation = new ObservableCollection<KeyValuePair<string, string>>();
+            InitializeEnumDefaultValues();
+            InitializeCollections();
             InitializeCommands();
         }
 
+        /// <summary>
+        /// Occurs when the validation errors for a property have changed.
+        /// </summary>
         public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
 
         /// <summary>
@@ -126,14 +141,7 @@ namespace WTS.ViewModels
         /// SelectedAnimal property represents the currently selected animal in the UI.
         /// When this property is set, it triggers the update of the SelectedAnimalInformation property through the fody attribute.
         /// </summary>
-        public Animal SelectedAnimal { get => selectedAnimal; set { selectedAnimal = value; DisplaySelectedAnimalInfo(); } }
-
-        /// <summary>
-        /// Rread-only property that provides a detailed description of the currently selected animal.
-        /// It depends on the SelectedAnimal property and calls the DisplaySelectedAnimalInfo method to generate the description.
-        /// </summary>
-        //[DependsOn(nameof(SelectedAnimal))]
-        //public string SelectedAnimalInformation => DisplaySelectedAnimalInfo();
+        public Animal SelectedAnimal { get => _selectedAnimal; set { _selectedAnimal = value; DisplaySelectedAnimalInfo(); } }
 
         /// <summary>
         /// AvailableCategories is a read-only property that provides a list of all animal categories that are available for selection.
@@ -153,6 +161,10 @@ namespace WTS.ViewModels
         /// </summary>
         public ObservableCollection<Animal> Animals { get; private set; }
 
+        /// <summary>
+        /// Contains information about the selected animal as a collection of key-value pairs, bound to UI Summary element.
+        /// Updates whenever the SelectedAnimal property changes.
+        /// </summary>
         [DependsOn(nameof(SelectedAnimal))]
         public ObservableCollection<KeyValuePair<string, string>> AnimalInformation { get; private set; }
 
@@ -196,7 +208,10 @@ namespace WTS.ViewModels
             }
         }
 
-        public bool HasErrors => _validationErrorsMap.Any(kv => kv.Value != null && kv.Value.Count > 0);
+        /// <summary>
+        /// Indicates whether there are any validation errors in the ViewModel prioperties bound to the UI.
+        /// </summary>
+        public bool HasErrors => _validationErrorsMap.Any(kv => kv.Value?.Count > 0);
 
         /// <summary>
         /// Represents the state of the "List All Animals" checkbox in the UI.
@@ -248,20 +263,20 @@ namespace WTS.ViewModels
 
         #region Animal properties mirroring Model Layer
 
-        //Animal properties, most are bound to UI and transfered to constructor at moment of Animal object creation
+        // Animal properties, most are bound to UI and transfered to constructor at moment of Animal object creation
 
         // Animal
         public Animal Animal { get; set; }
         public string Id { get; set; }
-        public string? Name { get; set; }
-        public int? Age { get; set; }
+        public string? Name { get => name; set { name = value; ValidateProperty(); } }
+        public int? Age { get => age; set { age = value; ValidateProperty(); } }
 
         public GenderType SelectedGender { get; set; }
 
         // Amphibian
         public bool Landliving { get; set; }
-        public string Color { get; set; }
-        public double RegenerationRate { get; set; }
+        public string Color { get => color; set { color = value; ValidateProperty(); } }
+        public double RegenerationRate { get => regenerationRate; set { regenerationRate = value; ValidateProperty(); } }
 
         // Arachnid
         public bool Venomous { get; set; }
@@ -271,27 +286,27 @@ namespace WTS.ViewModels
         // Bird
         public bool Migratory { get; set; }
         public bool HasHatchling { get; set; }
-        public int DivingSpeed { get; set; }
+        public int DivingSpeed { get => divingSpeed; set { divingSpeed = value; ValidateProperty(); } }
 
         // Fish
-        public WaterHabitatType WaterType { get; set; }
+        public WaterHabitatType SelectedWaterType { get; set; }
         public bool HasBeenCaught { get; set; }
-        public int NumberOfGills { get; set; }
+        public int NumberOfGills { get => numberOfGills; set { numberOfGills = value; ValidateProperty(); } }
 
         // Insect
         public bool CanFly { get; set; }
         public bool Solitary { get; set; }
-        public int NumberOfSpots { get; set; }
+        public int NumberOfSpots { get => numberOfSpots; set { numberOfSpots = value; ValidateProperty(); } }
 
         // Mammal
-        public int NumberOfLegs { get; set; }
-        public string Breed { get; set; }
-        public int TrunkLength { get; set; }
+        public int NumberOfLegs { get => numberOfLegs; set { numberOfLegs = value; ValidateProperty(); } }
+        public string Breed { get => breed; set { breed = value; ValidateProperty(); } }
+        public int TrunkLength { get => trunkLength; set { trunkLength = value; ValidateProperty(); } }
 
         // Reptile
         public bool HasScales { get; set; }
-        public HuntingTechniqueType HuntingTechnique { get; set; }
-        public int MaxAgeInYears { get; set; }
+        public HuntingTechniqueType SelectedHuntingTechnique { get; set; }
+        public int MaxAgeInYears { get => maxAgeInYears; set { maxAgeInYears = value; ValidateProperty(); } }
 
         #endregion
 
@@ -320,7 +335,8 @@ namespace WTS.ViewModels
         /// </summary>
         private Animal CreateAnimalFromSelectedSpecies()
         {
-            if (_selectedSpecies is not null && _speciesCreationMap.TryGetValue(_selectedSpecies, out Func<Animal>? createAnimal))
+            bool speciesIsSelected = SelectedSpecies is not null;
+            if (speciesIsSelected && _speciesCreationMap.TryGetValue(SelectedSpecies, out Func<Animal>? createAnimal))
             {
                 if (createAnimal is not null)
                 {
@@ -365,7 +381,7 @@ namespace WTS.ViewModels
         }
 
         /// <summary>
-        /// Generates a string representation of the properties of the currently selected animal with the help of ObjectInspectorHelper class.
+        /// Generates a string representation of the properties of the currently selected animal with an inherited KeyValuePair.
         /// </summary>
         private void DisplaySelectedAnimalInfo()
         {
@@ -381,41 +397,6 @@ namespace WTS.ViewModels
             }
         }
 
-        ///// <summary>
-        ///// Generates a string representation of the properties of the currently selected animal with the help of ObjectInspectorHelper class.
-        ///// </summary>
-        //private string DisplaySelectedAnimalInfo()
-        //{
-        //    if (SelectedAnimal is not null)
-        //    {
-        //        return SelectedAnimal.ToString();
-        //    }
-        //    else
-        //    {
-        //        Debug.WriteLine("_selectedAnimal is null");
-        //        return string.Empty;
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Generates a string representation of the properties of the currently selected animal with the help of ObjectInspectorHelper class.
-        ///// </summary>
-        //private string DisplaySelectedAnimalInfo()
-        //{
-        //    if (SelectedAnimal is not null)
-        //    {
-        //        return ObjectInspector.GetPropertiesToString(SelectedAnimal);
-        //    }
-        //    else
-        //    {
-        //        Debug.WriteLine("_selectedAnimal is null");
-        //        return string.Empty;
-        //    }
-        //}
-
-        /// <summary>
-        /// Updates the available species when the 'List All Animals' checkbox is checked or unchecked.
-        /// </summary>
         private void OnIsListAllAnimalsCheckedChanged()
         {
             if (IsListAllAnimalsChecked)
@@ -451,24 +432,49 @@ namespace WTS.ViewModels
             }
         }
 
-        protected void ValidateProperty(object value, [CallerMemberName] string? propertyName = null)
+        /// <summary>
+        /// Validates the caller property using the GeneralAnimalValidator.
+        /// Adds any errors found to a dictionary.
+        /// </summary>
+        protected void ValidateProperty([CallerMemberName] string? propertyName = null)
         {
-            var results = new List<ValidationResult>();
-            var context = new ValidationContext(this) { MemberName = propertyName };
-            Validator.TryValidateProperty(value, context, results);
-
-            if (results.Count != 0)
+            if (propertyName == null)
             {
-                _validationErrorsMap[propertyName] = results.ConvertAll(r => r.ErrorMessage);
+                throw new ArgumentNullException(nameof(propertyName), "Property name cannot be null.");
+            }
+
+            var results = _generalAnimalValidator.Validate(this, options => options.IncludeProperties(propertyName));
+            bool errorsChanged = false;
+
+            if (results.IsValid && _validationErrorsMap.ContainsKey(propertyName))
+            {
+                _validationErrorsMap.Remove(propertyName);
+                errorsChanged = true;
             }
             else
             {
-                _validationErrorsMap.Remove(propertyName);
+                var newErrors = results.Errors
+                                       .Where(e => e.PropertyName == propertyName)
+                                       .Select(e => e.ErrorMessage)
+                                       .ToList();
+
+                if (!_validationErrorsMap.TryGetValue(propertyName, out var existingErrors) || !newErrors.SequenceEqual(existingErrors))
+                {
+                    _validationErrorsMap[propertyName] = newErrors;
+                    errorsChanged = true;
+                }
             }
 
-            ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
+            if (errorsChanged)
+            {
+                ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
+            }
         }
 
+        /// <summary>
+        /// Retrieves the validation errors for a specified property.
+        /// </summary>
+        /// <returns>A collection of error messages for the specified property, or null if no errors are found.</returns>
         public IEnumerable GetErrors(string? propertyName)
         {
             if (string.IsNullOrEmpty(propertyName) || !_validationErrorsMap.TryGetValue(propertyName, out List<string>? value))
@@ -486,6 +492,26 @@ namespace WTS.ViewModels
             CreateAnimalCommand = new RelayCommand(_ => CreateAnimal());
             ListAllAnimalsCommand = new RelayCommand(_ => OnIsListAllAnimalsCheckedChanged());
             AddAnimalImageCommand = new RelayCommand(_ => DisplayImage());
+        }
+
+        /// <summary>
+        /// Initializes the ObservableCollections used in the ViewModel.
+        /// </summary>
+        private void InitializeCollections()
+        {
+            AvailableSpecies = new ObservableCollection<string>();
+            Animals = new ObservableCollection<Animal>();
+            AnimalInformation = new ObservableCollection<KeyValuePair<string, string>>();
+        }
+
+        /// <summary>
+        /// Initializes default values to the enums used in the ViewModel.
+        /// </summary>
+        private void InitializeEnumDefaultValues()
+        {
+            SelectedGender = GenderType.Unknown;
+            SelectedWaterType = WaterHabitatType.Unknown;
+            SelectedHuntingTechnique = HuntingTechniqueType.Unknown;
         }
 
         /// <summary>
@@ -556,13 +582,13 @@ namespace WTS.ViewModels
         {
             return new Dictionary<CategoryType, List<string>>
             {
-                { CategoryType.Amphibian, new List<string> { Frog, Axolotl } },
-                { CategoryType.Arachnid, new List<string> { Spider, Scorpion } },
-                { CategoryType.Bird, new List<string> { Raven, Falcon } },
-                { CategoryType.Fish, new List<string> { Salmon, Shark } },
-                { CategoryType.Insect, new List<string> { Bee, Ladybug } },
-                { CategoryType.Mammal, new List<string> { Cat, Elephant } },
-                { CategoryType.Reptile, new List<string> { Snake, Tortoise } },
+                [CategoryType.Amphibian] = new List<string> { Frog, Axolotl },
+                [CategoryType.Arachnid] = new List<string> { Spider, Scorpion },
+                [CategoryType.Bird] = new List<string> { Raven, Falcon },
+                [CategoryType.Fish] = new List<string> { Salmon, Shark },
+                [CategoryType.Insect] = new List<string> { Bee, Ladybug },
+                [CategoryType.Mammal] = new List<string> { Cat, Elephant },
+                [CategoryType.Reptile] = new List<string> { Snake, Tortoise },
             };
         }
 
@@ -573,34 +599,38 @@ namespace WTS.ViewModels
         {
             return new Dictionary<string, Func<Animal>>
             {
-                { Frog, () => new Frog(AnimalIdGenerator.GenerateId(Frog), Name, Age, SelectedGender, Landliving, Color) },
-                { Axolotl, () => new Axolotl(AnimalIdGenerator.GenerateId(Axolotl), Name, Age, SelectedGender, Landliving, RegenerationRate) },
-                { Spider, () => new Spider(AnimalIdGenerator.GenerateId(Spider), Name, Age, SelectedGender, Venomous, WebWeaving) },
-                { Scorpion, () => new Scorpion(AnimalIdGenerator.GenerateId(Scorpion), Name, Age, SelectedGender, Venomous, Nocturnal) },
-                { Raven, () => new Raven(AnimalIdGenerator.GenerateId(Raven), Name, Age, SelectedGender, Migratory, HasHatchling) },
-                { Falcon, () => new Falcon(AnimalIdGenerator.GenerateId(Falcon), Name, Age, SelectedGender, Migratory, DivingSpeed) },
-                { Salmon, () => new Salmon(AnimalIdGenerator.GenerateId(Salmon), Name, Age, SelectedGender, WaterType, HasBeenCaught) },
-                { Shark, () => new Shark(AnimalIdGenerator.GenerateId(Shark), Name, Age, SelectedGender, WaterType, NumberOfGills) },
-                { Bee, () => new Bee(AnimalIdGenerator.GenerateId(Bee), Name, Age, SelectedGender, CanFly, Solitary) },
-                { Ladybug, () => new Ladybug(AnimalIdGenerator.GenerateId(Ladybug), Name, Age, SelectedGender, CanFly, NumberOfSpots) },
-                { Cat, () => new Cat(AnimalIdGenerator.GenerateId(Cat), Name, Age, SelectedGender, NumberOfLegs, Breed) },
-                { Elephant, () => new Elephant(AnimalIdGenerator.GenerateId(Elephant), Name, Age, SelectedGender, NumberOfLegs, TrunkLength) },
-                { Snake, () => new Snake(AnimalIdGenerator.GenerateId(Snake), Name, Age, SelectedGender, HasScales, HuntingTechnique) },
-                { Tortoise, () => new Tortoise(AnimalIdGenerator.GenerateId(Tortoise), Name, Age, SelectedGender, HasScales, MaxAgeInYears) },
+                [Frog] = () => new Frog(AnimalIdGenerator.GenerateId(Frog), Name, Age, SelectedGender, Landliving, Color),
+                [Axolotl] = () => new Axolotl(AnimalIdGenerator.GenerateId(Axolotl), Name, Age, SelectedGender, Landliving, RegenerationRate),
+                [Spider] = () => new Spider(AnimalIdGenerator.GenerateId(Spider), Name, Age, SelectedGender, Venomous, WebWeaving),
+                [Scorpion] = () => new Scorpion(AnimalIdGenerator.GenerateId(Scorpion), Name, Age, SelectedGender, Venomous, Nocturnal),
+                [Raven] = () => new Raven(AnimalIdGenerator.GenerateId(Raven), Name, Age, SelectedGender, Migratory, HasHatchling),
+                [Falcon] = () => new Falcon(AnimalIdGenerator.GenerateId(Falcon), Name, Age, SelectedGender, Migratory, DivingSpeed),
+                [Salmon] = () => new Salmon(AnimalIdGenerator.GenerateId(Salmon), Name, Age, SelectedGender, SelectedWaterType, HasBeenCaught),
+                [Shark] = () => new Shark(AnimalIdGenerator.GenerateId(Shark), Name, Age, SelectedGender, SelectedWaterType, NumberOfGills),
+                [Bee] = () => new Bee(AnimalIdGenerator.GenerateId(Bee), Name, Age, SelectedGender, CanFly, Solitary),
+                [Ladybug] = () => new Ladybug(AnimalIdGenerator.GenerateId(Ladybug), Name, Age, SelectedGender, CanFly, NumberOfSpots),
+                [Cat] = () => new Cat(AnimalIdGenerator.GenerateId(Cat), Name, Age, SelectedGender, NumberOfLegs, Breed),
+                [Elephant] = () => new Elephant(AnimalIdGenerator.GenerateId(Elephant), Name, Age, SelectedGender, NumberOfLegs, TrunkLength),
+                [Snake] = () => new Snake(AnimalIdGenerator.GenerateId(Snake), Name, Age, SelectedGender, HasScales, SelectedHuntingTechnique),
+                [Tortoise] = () => new Tortoise(AnimalIdGenerator.GenerateId(Tortoise), Name, Age, SelectedGender, HasScales, MaxAgeInYears),
             };
         }
 
+        /// <summary>
+        /// Initializes a map linking each animal category to an action that sets the visibility of its specific properties in the UI.
+        /// </summary>
+        /// <returns>A dictionary mapping CategoryType to actions that update visibility properties.</returns>
         private Dictionary<CategoryType, Action> InitializeCategoryVisibilityMap()
         {
             return new Dictionary<CategoryType, Action>
             {
-                { CategoryType.Amphibian, () => LandlivingVisible = true },
-                { CategoryType.Arachnid, () => VenomousVisible = true },
-                { CategoryType.Bird, () => MigratoryVisible = true },
-                { CategoryType.Fish, () => WaterTypeVisible = true },
-                { CategoryType.Insect, () => CanFlyVisible = true },
-                { CategoryType.Mammal, () => NumberOfLegsVisible = true },
-                { CategoryType.Reptile, () => HasScalesVisible = true },
+                [CategoryType.Amphibian] = () => LandlivingVisible = true,
+                [CategoryType.Arachnid] = () => VenomousVisible = true,
+                [CategoryType.Bird] = () => MigratoryVisible = true,
+                [CategoryType.Fish] = () => WaterTypeVisible = true,
+                [CategoryType.Insect] = () => CanFlyVisible = true,
+                [CategoryType.Mammal] = () => NumberOfLegsVisible = true,
+                [CategoryType.Reptile] = () => HasScalesVisible = true,
             };
         }
 
@@ -628,9 +658,13 @@ namespace WTS.ViewModels
             };
         }
 
-        private Dictionary<string, List<string>> InitializeValidationErrorMap()
+        /// <summary>
+        /// Initializes an empty dictionary to store validation errors for properties.
+        /// </summary>
+        /// <returns>An empty dictionary for storing property validation errors.</returns>
+        private Dictionary<string, List<string>?> InitializeValidationErrorMap()
         {
-            return new Dictionary<string, List<string>>();
+            return new Dictionary<string, List<string>?>();
         }
     }
 }
