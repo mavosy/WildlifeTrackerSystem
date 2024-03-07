@@ -20,5 +20,10 @@ namespace WTS.Models.Fish
             }
             yield return new KeyValuePair<string, ValueWrapper>("HasBeenCaught", ValueWrapper.Create(HasBeenCaught));
         }
+
+        public override string GetAnimalSoundAsString()
+        {
+            return "Splash";
+        }
     }
 }

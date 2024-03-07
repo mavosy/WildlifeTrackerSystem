@@ -21,5 +21,10 @@ namespace WTS.Models.Arachnids
             }
             yield return new KeyValuePair<string, ValueWrapper>("Nocturnal", ValueWrapper.Create(Nocturnal));
         }
+
+        public override string GetAnimalSoundAsString()
+        {
+            return "Click";
+        }
     }
 }

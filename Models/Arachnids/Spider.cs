@@ -21,5 +21,10 @@ namespace WTS.Models.Arachnids
             }
             yield return new KeyValuePair<string, ValueWrapper>("WebWeaving", ValueWrapper.Create(WebWeaving));
         }
+
+        public override string GetAnimalSoundAsString()
+        {
+            return "Skitter";
+        }
     }
 }

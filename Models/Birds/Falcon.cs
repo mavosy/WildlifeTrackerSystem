@@ -24,5 +24,10 @@ namespace WTS.Models.Birds
             }
             yield return new KeyValuePair<string, ValueWrapper>("DivingSpeed", ValueWrapper.Create(DivingSpeed));
         }
+
+        public override string GetAnimalSoundAsString()
+        {
+            return "Screech";
+        }
     }
 }

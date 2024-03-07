@@ -21,5 +21,10 @@ namespace WTS.Models.Mammals
             }
             yield return new KeyValuePair<string, ValueWrapper>("Breed", ValueWrapper.Create(Breed));
         }
+
+        public override string GetAnimalSoundAsString()
+        {
+            return "Meow";
+        }
     }
 }

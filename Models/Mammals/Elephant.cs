@@ -24,5 +24,10 @@ namespace WTS.Models.Mammals
             }
             yield return new KeyValuePair<string, ValueWrapper>("TrunkLength", ValueWrapper.Create(TrunkLength));
         }
+
+        public override string GetAnimalSoundAsString()
+        {
+            return "Trumpet";
+        }
     }
 }
