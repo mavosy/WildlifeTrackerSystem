@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using WTS.Enums;
+﻿using WTS.Enums;
 using WTS.Models.AnimalBase;
 using WTS.Utilities;
 
@@ -13,7 +12,6 @@ namespace WTS.Models.Fish
             Habitat = habitat;
         }
 
-        [Required(ErrorMessage = "This information is required")]
         protected WaterHabitatType Habitat { get; set; }
 
         public override IEnumerable<KeyValuePair<string, ValueWrapper>> GetPropertiesAsKeyValuePairs()
