@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using WTS.Enums;
+using WTS.Utilities;
 
 namespace WTS.Models.Fish
 {
@@ -15,9 +16,13 @@ namespace WTS.Models.Fish
         [Range(0, 7, ErrorMessage = "Must be between 0 and 7")]
         public int NumberOfGills { get; set; }
 
-        public override string ToString()
+        public override IEnumerable<KeyValuePair<string, ValueWrapper>> GetPropertiesAsKeyValuePairs()
         {
-            return $"{base.ToString()}, Number of gills: {NumberOfGills}";
+            foreach (KeyValuePair<string, ValueWrapper> keyValuePair in base.GetPropertiesAsKeyValuePairs())
+            {
+                yield return keyValuePair;
+            }
+            yield return new KeyValuePair<string, ValueWrapper>("NumberOfGills", ValueWrapper.Create(NumberOfGills));
         }
     }
 }

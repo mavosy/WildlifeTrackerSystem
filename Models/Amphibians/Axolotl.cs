@@ -27,12 +27,5 @@ namespace WTS.Models.Amphibians
             }
             yield return new KeyValuePair<string, ValueWrapper>("Regeneration", ValueWrapper.Create(RegenerationRate));
         }
-
-        //public override string ToString()
-        //{
-        //    return 
-        //        $"{base.ToString()}\n" +
-        //        $"Regeneration:\t{RegenerationRate}";
-        //}
     }
 }

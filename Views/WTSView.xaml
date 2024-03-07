@@ -8,7 +8,7 @@
         xmlns:vm="clr-namespace:WTS.ViewModels"
         d:DataContext="{d:DesignInstance {x:Type vm:WTSViewModel}}"
         mc:Ignorable="d"
-        Title="WildlifeTracker" Height="600" Width="750">
+        Title="WildlifeTracker" Height="600" Width="900">
 
 
     <!--IValueConverter to toggle the visibility of input controllers with a boolean flag-->
@@ -16,33 +16,54 @@
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
         <conv:DebugConverter x:Key="DebugConverter" />
         <conv:ValidationErrorNullConverter x:Key="ValidationErrorNullConverter" />
-    </Window.Resources> 
+        <conv:FirstValidationErrorConverter x:Key="FirstValidationErrorConverter"/>
+        <conv:StringToIntConverter x:Key="StringToIntConverter"/>
+        <conv:StringToDoubleConverter x:Key="StringToDoubleConverter"/>
+    </Window.Resources>
 
     <DockPanel>
         <Grid DockPanel.Dock="Top" Margin="20">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="100*"/>
-                <ColumnDefinition Width="50*"/>
+                <ColumnDefinition Width="427*"/>
+                <ColumnDefinition Width="283*"/>
             </Grid.ColumnDefinitions>
 
             <!-- Data input -->
             <StackPanel Grid.Column="0" Margin="5,5,5,5">
                 <TextBlock Text="Animal Specifications" FontWeight="Bold"/>
+                
+                <!--Name input-->
                 <StackPanel Orientation="Horizontal">
-                    <!--Name input-->
                     <Label Content="Name" Target="{Binding ElementName=nameTextBox}" VerticalAlignment="Center" Width="80"/>
-                    <TextBox Name="nameTextBox" Width="150" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}">
-                        <TextBox.ToolTip>
-                            <ToolTip Content="{Binding (Validation.Errors), RelativeSource={RelativeSource Self}, Converter={StaticResource ValidationErrorNullConverter}}" 
-                                        IsEnabled="{Binding (Validation.HasError), RelativeSource={RelativeSource Self}}"/>
-                        </TextBox.ToolTip>
+                    <TextBox Name="nameTextBox" Width="150" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                        Style="{StaticResource ErrorTextBoxStyle}">
                     </TextBox>
+                    <Popup Placement="Right" PlacementTarget="{Binding ElementName=nameTextBox}" HorizontalOffset="5"
+                           IsOpen="{Binding ElementName=nameTextBox, Path=(Validation.HasError), Mode=OneWay}" StaysOpen="False">
+                        <Border Style="{StaticResource ValidationErrorPopupBorderStyle}">
+                            <TextBlock Text="{Binding ElementName=nameTextBox, Path=(Validation.Errors), 
+                                                Converter={StaticResource FirstValidationErrorConverter}, ConverterParameter='All'}" 
+                                       Foreground="WhiteSmoke" Padding="10" FontSize="12" TextWrapping="Wrap" />
+                        </Border>
+                    </Popup>
                 </StackPanel>
+                
                 <!--Age input-->
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Age" Target="{Binding ElementName=ageTextBox}" VerticalAlignment="Center" Width="80"/>
-                    <TextBox Name="ageTextBox" Width="150" Text="{Binding Age, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"/>
+                    <TextBox Name="ageTextBox" Width="150" Text="{Binding Age, Converter={StaticResource StringToIntConverter},UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                Style="{StaticResource ErrorTextBoxStyle}">
+                    </TextBox>
+                    <Popup Placement="Right" PlacementTarget="{Binding ElementName=ageTextBox}" HorizontalOffset="5"
+                            IsOpen="{Binding ElementName=ageTextBox, Path=(Validation.HasError), Mode=OneWay}" StaysOpen="False">
+                        <Border Style="{StaticResource ValidationErrorPopupBorderStyle}">
+                            <TextBlock Text="{Binding ElementName=ageTextBox, Path=(Validation.Errors), 
+                                                Converter={StaticResource FirstValidationErrorConverter}, ConverterParameter='All'}"
+                                        Foreground="WhiteSmoke" Padding="10" FontSize="12" TextWrapping="Wrap"/>
+                        </Border>
+                    </Popup>
                 </StackPanel>
+
                 <!--Gender input-->
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Gender" Target="{Binding ElementName=genderCombo}" VerticalAlignment="Center" Width="80"/>
@@ -60,40 +81,57 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Grid.Column="0" Grid.Row="0">
+                        
                         <!--Amphibian specific input-->
                         <StackPanel>
                             <CheckBox Content="Landliving" IsChecked="{Binding Landliving}" Margin="5, 5, 5, 5"
                                   Visibility="{Binding LandlivingVisible, Converter={StaticResource BoolToVisibility}}" />
                         </StackPanel>
+                        
                         <!--Arachnid specific input-->
                         <StackPanel>
                             <CheckBox Content="Venomous" IsChecked="{Binding Venomous}" Margin="5, 5, 5, 5"
                                   Visibility="{Binding VenomousVisible, Converter={StaticResource BoolToVisibility}}" />
                         </StackPanel>
+                        
                         <!--Bird specific input-->
                         <StackPanel>
                             <CheckBox Content="Migratory" IsChecked="{Binding Migratory}" Margin="5, 5, 5, 5"
                                   Visibility="{Binding MigratoryVisible, Converter={StaticResource BoolToVisibility}}" />
                         </StackPanel>
+                        
                         <!--Fish specific input-->
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Water type" Target="{Binding ElementName=waterTypeCombo}" VerticalAlignment="Center" Width="80"
                                    Visibility="{Binding WaterTypeVisible, Converter={StaticResource BoolToVisibility}}"/>
-                            <ComboBox Name="waterTypeCombo" Width="120" SelectedItem="{Binding WaterType}" ItemsSource="{Binding WaterTypes}" DisplayMemberPath="."
+                            <ComboBox Name="waterTypeCombo" Width="120" SelectedItem="{Binding SelectedWaterType}" ItemsSource="{Binding WaterTypes}" DisplayMemberPath="."
                                       Visibility="{Binding WaterTypeVisible, Converter={StaticResource BoolToVisibility}}"/>
                         </StackPanel>
+                        
                         <!--Insect specific input-->
                         <StackPanel>
                             <CheckBox Content="Can fly" IsChecked="{Binding CanFly}" Margin="5, 5, 5, 5"
                                   Visibility="{Binding CanFlyVisible, Converter={StaticResource BoolToVisibility}}" />
                         </StackPanel>
+                        
                         <!--Mammal specific input-->
                         <StackPanel Orientation="Horizontal">
-                            <Label Content="Number of legs" Target="{Binding ElementName=numberOfLegsTextBox}" Width="90"
-                                   Visibility="{Binding NumberOfLegsVisible, Converter={StaticResource BoolToVisibility}}"/>
-                            <TextBox Name="numberOfLegsTextBox" Text="{Binding NumberOfLegs}" Margin="5, 5, 5, 5" Width="100"
-                                 Visibility="{Binding NumberOfLegsVisible, Converter={StaticResource BoolToVisibility}}" />
+                            <Label Content="Number of legs" Target="{Binding ElementName=numberOfLegsTextBox}" Width="120"
+                                    Visibility="{Binding NumberOfLegsVisible, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBox Name="numberOfLegsTextBox" Text="{Binding NumberOfLegs, Converter={StaticResource StringToIntConverter}, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                        Style="{StaticResource ErrorTextBoxStyle}" Margin="5, 5, 5, 5" Width="70"
+                                        Visibility="{Binding NumberOfLegsVisible, Converter={StaticResource BoolToVisibility}}">
+                            </TextBox>
+                            <Popup Placement="Right" PlacementTarget="{Binding ElementName=numberOfLegsTextBox}" HorizontalOffset="5"
+                                    IsOpen="{Binding ElementName=numberOfLegsTextBox, Path=(Validation.HasError), Mode=OneWay}" StaysOpen="False">
+                                <Border Style="{StaticResource ValidationErrorPopupBorderStyle}">
+                                    <TextBlock Text="{Binding ElementName=numberOfLegsTextBox, Path=(Validation.Errors), 
+                                                Converter={StaticResource FirstValidationErrorConverter}, ConverterParameter='All'}"
+                                                Foreground="WhiteSmoke" Padding="10" FontSize="12" TextWrapping="Wrap"/>
+                                </Border>
+                            </Popup>
                         </StackPanel>
+
                         <!--Insect specific input-->
                         <StackPanel>
                             <CheckBox Content="Has scales" IsChecked="{Binding HasScales}" Margin="5, 5, 5, 5"
@@ -103,20 +141,43 @@
                     </StackPanel>
 
                     <StackPanel Grid.Column="2" Grid.Row="0">
+
                         <!--Frog specific input-->
                         <StackPanel Orientation="Horizontal">
-                            <Label Content="Color" Target="{Binding ElementName=colorTextBox}" Width="90"
-                                   Visibility="{Binding ColorVisible, Converter={StaticResource BoolToVisibility}}"/>
-                            <TextBox Name="colorTextBox" Text="{Binding Color}" Margin="5, 5, 5, 5" Width="100"
-                                 Visibility="{Binding ColorVisible, Converter={StaticResource BoolToVisibility}}" />
+                            <Label Content="Color" Target="{Binding ElementName=colorTextBox}" Width="120"
+                                    Visibility="{Binding ColorVisible, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBox Name="colorTextBox" Text="{Binding Color, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                        Style="{StaticResource ErrorTextBoxStyle}" Margin="5, 5, 5, 5" Width="70"
+                                        Visibility="{Binding ColorVisible, Converter={StaticResource BoolToVisibility}}">
+                            </TextBox>
+                            <Popup Placement="Right" PlacementTarget="{Binding ElementName=colorTextBox}" HorizontalOffset="5"
+                                    IsOpen="{Binding ElementName=colorTextBox, Path=(Validation.HasError), Mode=OneWay}" StaysOpen="False">
+                                <Border Style="{StaticResource ValidationErrorPopupBorderStyle}">
+                                    <TextBlock Text="{Binding ElementName=colorTextBox, Path=(Validation.Errors), 
+                                                Converter={StaticResource FirstValidationErrorConverter}, ConverterParameter='All'}"
+                                                Foreground="WhiteSmoke" Padding="10" FontSize="12" TextWrapping="Wrap"/>
+                                </Border>
+                            </Popup>
                         </StackPanel>
+
                         <!--Axolotl specific input-->
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Regeneration rate" Target="{Binding ElementName=regenerationRateTextBox}" Width="120"
-                                   Visibility="{Binding RegenerationRateVisible, Converter={StaticResource BoolToVisibility}}"/>
-                            <TextBox Name="regenerationRateTextBox" Text="{Binding Color}" Margin="5, 5, 5, 5" Width="70"
-                                 Visibility="{Binding RegenerationRateVisible, Converter={StaticResource BoolToVisibility}}" />
+                                    Visibility="{Binding RegenerationRateVisible, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBox Name="regenerationRateTextBox" Text="{Binding RegenerationRate, Converter={StaticResource StringToDoubleConverter}, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                        Style="{StaticResource ErrorTextBoxStyle}" Margin="5, 5, 5, 5" Width="70"
+                                        Visibility="{Binding RegenerationRateVisible, Converter={StaticResource BoolToVisibility}}">
+                            </TextBox>
+                            <Popup Placement="Right" PlacementTarget="{Binding ElementName=regenerationRateTextBox}" HorizontalOffset="5"
+                                    IsOpen="{Binding ElementName=regenerationRateTextBox, Path=(Validation.HasError), Mode=OneWay}" StaysOpen="False">
+                                <Border Style="{StaticResource ValidationErrorPopupBorderStyle}">
+                                    <TextBlock Text="{Binding ElementName=regenerationRateTextBox, Path=(Validation.Errors), 
+                                                Converter={StaticResource FirstValidationErrorConverter}, ConverterParameter='All'}"
+                                                Foreground="WhiteSmoke" Padding="10" FontSize="12" TextWrapping="Wrap"/>
+                                </Border>
+                            </Popup>
                         </StackPanel>
+
                         <!--Spider specific input-->
                         <StackPanel>
                             <CheckBox Content="Web weaving" IsChecked="{Binding WebWeaving}" Margin="5, 5, 5, 5"
@@ -127,73 +188,143 @@
                             <CheckBox Content="Nocturnal" IsChecked="{Binding Nocturnal}" Margin="5, 5, 5, 5"
                                   Visibility="{Binding NocturnalVisible, Converter={StaticResource BoolToVisibility}}" />
                         </StackPanel>
+
                         <!--Raven specific input-->
                         <StackPanel>
                             <CheckBox Content="Has hatchling" IsChecked="{Binding HasHatchling}" Margin="5, 5, 5, 5"
                                   Visibility="{Binding HasHatchlingVisible, Converter={StaticResource BoolToVisibility}}" />
                         </StackPanel>
+
                         <!--Falcon specific input-->
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Diving speed" Target="{Binding ElementName=divingSpeedTextBox}" Width="120"
-                                   Visibility="{Binding DivingSpeedVisible, Converter={StaticResource BoolToVisibility}}"/>
-                            <TextBox Name="divingSpeedTextBox" Text="{Binding DivingSpeed}" Margin="5, 5, 5, 5" Width="70"
-                                 Visibility="{Binding DivingSpeedVisible, Converter={StaticResource BoolToVisibility}}" />
+                                    Visibility="{Binding DivingSpeedVisible, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBox Name="divingSpeedTextBox" Text="{Binding DivingSpeed, Converter={StaticResource StringToIntConverter}, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                        Style="{StaticResource ErrorTextBoxStyle}" Margin="5, 5, 5, 5" Width="70"
+                                        Visibility="{Binding DivingSpeedVisible, Converter={StaticResource BoolToVisibility}}">
+                            </TextBox>
+                            <Popup Placement="Right" PlacementTarget="{Binding ElementName=divingSpeedTextBox}" HorizontalOffset="5"
+                                    IsOpen="{Binding ElementName=divingSpeedTextBox, Path=(Validation.HasError), Mode=OneWay}" StaysOpen="False">
+                                <Border Style="{StaticResource ValidationErrorPopupBorderStyle}">
+                                    <TextBlock Text="{Binding ElementName=divingSpeedTextBox, Path=(Validation.Errors), 
+                                                Converter={StaticResource FirstValidationErrorConverter}, ConverterParameter='All'}"
+                                                Foreground="WhiteSmoke" Padding="10" FontSize="12" TextWrapping="Wrap"/>
+                                </Border>
+                            </Popup>
                         </StackPanel>
+
+
                         <!--Salmon specific input-->
                         <StackPanel>
                             <CheckBox Content="Has been caught at least once" IsChecked="{Binding HasBeenCaught}" Margin="5, 5, 5, 5"
                                   Visibility="{Binding HasBeenCaughtVisible, Converter={StaticResource BoolToVisibility}}" />
                         </StackPanel>
+
                         <!--Shark specific input-->
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Number of gills" Target="{Binding ElementName=numberOfGillsTextBox}" Width="120"
-                                   Visibility="{Binding NumberOfGillsVisible, Converter={StaticResource BoolToVisibility}}"/>
-                            <TextBox Name="numberOfGillsTextBox" Text="{Binding NumberOfGills}" Margin="5, 5, 5, 5" Width="70"
-                                 Visibility="{Binding NumberOfGillsVisible, Converter={StaticResource BoolToVisibility}}" />
+                                    Visibility="{Binding NumberOfGillsVisible, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBox Name="numberOfGillsTextBox" Text="{Binding NumberOfGills, Converter={StaticResource StringToIntConverter}, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                        Style="{StaticResource ErrorTextBoxStyle}" Margin="5, 5, 5, 5" Width="70"
+                                        Visibility="{Binding NumberOfGillsVisible, Converter={StaticResource BoolToVisibility}}">
+                            </TextBox>
+                            <Popup Placement="Right" PlacementTarget="{Binding ElementName=numberOfGillsTextBox}" HorizontalOffset="5"
+                                    IsOpen="{Binding ElementName=numberOfGillsTextBox, Path=(Validation.HasError), Mode=OneWay}" StaysOpen="False">
+                                <Border Style="{StaticResource ValidationErrorPopupBorderStyle}">
+                                    <TextBlock Text="{Binding ElementName=numberOfGillsTextBox, Path=(Validation.Errors), 
+                                                Converter={StaticResource FirstValidationErrorConverter}, ConverterParameter='All'}"
+                                                Foreground="WhiteSmoke" Padding="10" FontSize="12" TextWrapping="Wrap"/>
+                                </Border>
+                            </Popup>
                         </StackPanel>
+
                         <!--Bee specific input-->
                         <StackPanel>
                             <CheckBox Content="Solitary" IsChecked="{Binding Solitary}" Margin="5, 5, 5, 5"
                                   Visibility="{Binding SolitaryVisible, Converter={StaticResource BoolToVisibility}}" />
                         </StackPanel>
+
                         <!--Ladybug specific input-->
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Number of spots" Target="{Binding ElementName=numberOfSpotsTextBox}" Width="120"
-                                   Visibility="{Binding NumberOfSpotsVisible, Converter={StaticResource BoolToVisibility}}"/>
-                            <TextBox Name="numberOfSpotsTextBox" Text="{Binding NumberOfSpots}" Margin="5, 5, 5, 5" Width="70"
-                                 Visibility="{Binding NumberOfSpotsVisible, Converter={StaticResource BoolToVisibility}}" />
+                                    Visibility="{Binding NumberOfSpotsVisible, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBox Name="numberOfSpotsTextBox" Text="{Binding NumberOfSpots, Converter={StaticResource StringToIntConverter}, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                        Style="{StaticResource ErrorTextBoxStyle}" Margin="5, 5, 5, 5" Width="70"
+                                        Visibility="{Binding NumberOfSpotsVisible, Converter={StaticResource BoolToVisibility}}">
+                            </TextBox>
+                            <Popup Placement="Right" PlacementTarget="{Binding ElementName=numberOfSpotsTextBox}" HorizontalOffset="5"
+                                    IsOpen="{Binding ElementName=numberOfSpotsTextBox, Path=(Validation.HasError), Mode=OneWay}" StaysOpen="False">
+                                <Border Style="{StaticResource ValidationErrorPopupBorderStyle}">
+                                    <TextBlock Text="{Binding ElementName=numberOfSpotsTextBox, Path=(Validation.Errors), 
+                                                Converter={StaticResource FirstValidationErrorConverter}, ConverterParameter='All'}"
+                                                Foreground="WhiteSmoke" Padding="10" FontSize="12" TextWrapping="Wrap"/>
+                                </Border>
+                            </Popup>
                         </StackPanel>
+
                         <!--Cat specific input-->
                         <StackPanel Orientation="Horizontal">
-                            <Label Content="Breed" Target="{Binding ElementName=breedTextBox}" Width="90"
-                                   Visibility="{Binding BreedVisible, Converter={StaticResource BoolToVisibility}}"/>
-                            <TextBox Name="breedTextBox" Text="{Binding Breed}" Margin="5, 5, 5, 5" Width="100"
-                                 Visibility="{Binding BreedVisible, Converter={StaticResource BoolToVisibility}}" />
+                            <Label Content="Breed" Target="{Binding ElementName=breedTextBox}" Width="120"
+                                    Visibility="{Binding BreedVisible, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBox Name="breedTextBox" Text="{Binding Breed, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                        Style="{StaticResource ErrorTextBoxStyle}" Margin="5, 5, 5, 5" Width="70"
+                                        Visibility="{Binding BreedVisible, Converter={StaticResource BoolToVisibility}}">
+                            </TextBox>
+                            <Popup Placement="Right" PlacementTarget="{Binding ElementName=breedTextBox}" HorizontalOffset="5"
+                                    IsOpen="{Binding ElementName=breedTextBox, Path=(Validation.HasError), Mode=OneWay}" StaysOpen="False">
+                                <Border Style="{StaticResource ValidationErrorPopupBorderStyle}">
+                                    <TextBlock Text="{Binding ElementName=breedTextBox, Path=(Validation.Errors), 
+                                                Converter={StaticResource FirstValidationErrorConverter}, ConverterParameter='All'}"
+                                                Foreground="WhiteSmoke" Padding="10" FontSize="12" TextWrapping="Wrap"/>
+                                </Border>
+                            </Popup>
                         </StackPanel>
+
                         <!--Elephant specific input-->
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Trunk length" Target="{Binding ElementName=trunkLengthTextBox}" Width="120"
                                    Visibility="{Binding TrunkLengthVisible, Converter={StaticResource BoolToVisibility}}"/>
-                            <TextBox Name="trunkLengthTextBox" Text="{Binding TrunkLength}" Margin="5, 5, 5, 5" Width="70"
-                                 Visibility="{Binding TrunkLengthVisible, Converter={StaticResource BoolToVisibility}}" />
+                            <TextBox Name="trunkLengthTextBox" Text="{Binding TrunkLength, Converter={StaticResource StringToIntConverter}, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                Style="{StaticResource ErrorTextBoxStyle}" Margin="5, 5, 5, 5" Width="70"
+                                 Visibility="{Binding TrunkLengthVisible, Converter={StaticResource BoolToVisibility}}">
+                            </TextBox>
+                            <Popup Placement="Right" PlacementTarget="{Binding ElementName=trunkLengthTextBox}" HorizontalOffset="5"
+                            IsOpen="{Binding ElementName=trunkLengthTextBox, Path=(Validation.HasError), Mode=OneWay}" StaysOpen="False">
+                                <Border Style="{StaticResource ValidationErrorPopupBorderStyle}">
+                                    <TextBlock Text="{Binding ElementName=trunkLengthTextBox, Path=(Validation.Errors), 
+                                                Converter={StaticResource FirstValidationErrorConverter}, ConverterParameter='All'}"
+                                        Foreground="WhiteSmoke" Padding="10" FontSize="12" TextWrapping="Wrap"/>
+                                </Border>
+                            </Popup>
                         </StackPanel>
+
                         <!--Snake specific input-->
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Hunting technique" Target="{Binding ElementName=huntingTechniqueCombo}" VerticalAlignment="Center" Width="80"
                                    Visibility="{Binding HuntingTechniqueVisible, Converter={StaticResource BoolToVisibility}}"/>
-                            <ComboBox Name="huntingTechniqueCombo" Width="120" SelectedItem="{Binding HuntingTechnique}" ItemsSource="{Binding HuntingTechniques}" DisplayMemberPath="."
+                            <ComboBox Name="huntingTechniqueCombo" Width="120" SelectedItem="{Binding SelectedHuntingTechnique}" ItemsSource="{Binding HuntingTechniques}" DisplayMemberPath="."
                                       Visibility="{Binding HuntingTechniqueVisible, Converter={StaticResource BoolToVisibility}}"/>
                         </StackPanel>
+
                         <!--Tortoise specific input-->
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Max age in years" Target="{Binding ElementName=maxAgeInYearsTextBox}" Width="120"
-                                   Visibility="{Binding MaxAgeInYearsVisible, Converter={StaticResource BoolToVisibility}}"/>
-                            <TextBox Name="maxAgeInYearsTextBox" Text="{Binding MaxAgeInYears}" Margin="5, 5, 5, 5" Width="70"
-                                 Visibility="{Binding MaxAgeInYearsVisible, Converter={StaticResource BoolToVisibility}}" />
+                                    Visibility="{Binding MaxAgeInYearsVisible, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBox Name="maxAgeInYearsTextBox" Text="{Binding MaxAgeInYears, Converter={StaticResource StringToIntConverter}, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                        Style="{StaticResource ErrorTextBoxStyle}" Margin="5, 5, 5, 5" Width="70"
+                                        Visibility="{Binding MaxAgeInYearsVisible, Converter={StaticResource BoolToVisibility}}">
+                            </TextBox>
+                            <Popup Placement="Right" PlacementTarget="{Binding ElementName=maxAgeInYearsTextBox}" HorizontalOffset="5"
+                                    IsOpen="{Binding ElementName=maxAgeInYearsTextBox, Path=(Validation.HasError), Mode=OneWay}" StaysOpen="False">
+                                <Border Style="{StaticResource ValidationErrorPopupBorderStyle}">
+                                    <TextBlock Text="{Binding ElementName=maxAgeInYearsTextBox, Path=(Validation.Errors), 
+                                                Converter={StaticResource FirstValidationErrorConverter}, ConverterParameter='All'}"
+                                                Foreground="WhiteSmoke" Padding="10" FontSize="12" TextWrapping="Wrap"/>
+                                </Border>
+                            </Popup>
                         </StackPanel>
 
                     </StackPanel>
-
                 </Grid>
 
                 <Grid Margin="0,10,0,0" Height="150">
@@ -202,7 +333,7 @@
                         <ColumnDefinition Width="10*"/>
                         <ColumnDefinition Width="100*"/>
                     </Grid.ColumnDefinitions>
-                    
+
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
@@ -226,11 +357,11 @@
             <!-- Object output and image -->
             <StackPanel Grid.Column="1" Margin="10,10,10,10">
                 <Button Content="Add Image" Width="150" Command="{Binding AddAnimalImageCommand}"/>
-                <Border Width="200" Height="200" BorderBrush="Gray" BorderThickness="1">
+                <Border Width="200" Height="230" BorderBrush="Gray" BorderThickness="1">
                     <Image Source="{Binding AnimalImage}" Stretch="Fill"/>
                 </Border>
-                <TextBlock Text="Summary:" FontWeight="Bold" TextAlignment="Center"/>
-                <Border Width="200" Height="200" BorderBrush="Gray" BorderThickness="1">
+                <TextBlock Text="Summary:" FontWeight="Bold" TextAlignment="Center" Margin="0,30,0,0"/>
+                <Border Width="280" Height="180" BorderBrush="Gray" BorderThickness="1" Margin="0,10,0,0">
                     <ItemsControl ItemsSource="{Binding AnimalInformation}" Grid.IsSharedSizeScope="True">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -245,11 +376,11 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                </Border>                
+                </Border>
                 <!--<Border Width="200" Height="200" BorderBrush="Gray" BorderThickness="1">
                     <TextBlock Text="{Binding SelectedAnimalInformation, Mode=OneWay, NotifyOnSourceUpdated=True}" Height="171" Width="200" />
                 </Border>-->
-                
+
             </StackPanel>
         </Grid>
     </DockPanel>

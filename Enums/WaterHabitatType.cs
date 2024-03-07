@@ -9,5 +9,6 @@
         Saltwater,
         Brackish,
         All,
+        Unknown,
     }
 }

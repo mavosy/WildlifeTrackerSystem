@@ -1,5 +1,4 @@
-﻿using System.Text;
-using WTS.Enums;
+﻿using WTS.Enums;
 using WTS.Models.AnimalBase;
 using WTS.Utilities;
 
@@ -23,24 +22,5 @@ namespace WTS.Models.Amphibians
             }
             yield return new KeyValuePair<string, ValueWrapper>("LandLiving", ValueWrapper.Create(Landliving));
         }
-
-
-
-        //public override string ToString()
-        //{
-        //    return 
-        //        $"{base.ToString()}\n" +
-        //        $"LandLiving:\t{Landliving}";
-        //}
-
-        //public override string ToString()
-        //{
-        //    var builder = new StringBuilder();
-
-        //    builder.AppendLine(base.ToString());
-        //    builder.AppendLine($"LandLiving:\t{Landliving}");
-
-        //    return builder.ToString();
-        //}
     }
 }

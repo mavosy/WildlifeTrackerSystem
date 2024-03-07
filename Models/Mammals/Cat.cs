@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using WTS.Enums;
+using WTS.Utilities;
 
 namespace WTS.Models.Mammals
 {
@@ -15,9 +16,13 @@ namespace WTS.Models.Mammals
         [StringLength(50,ErrorMessage = "Breed must be 50 characters or less")]
         public string Breed { get; set; }
 
-        public override string ToString()
+        public override IEnumerable<KeyValuePair<string, ValueWrapper>> GetPropertiesAsKeyValuePairs()
         {
-            return $"{base.ToString()}, Breed: {Breed}";
+            foreach (KeyValuePair<string, ValueWrapper> keyValuePair in base.GetPropertiesAsKeyValuePairs())
+            {
+                yield return keyValuePair;
+            }
+            yield return new KeyValuePair<string, ValueWrapper>("Breed", ValueWrapper.Create(Breed));
         }
     }
 }

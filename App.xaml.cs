@@ -2,6 +2,7 @@
 using System.Windows;
 using WTS.Services;
 using WTS.Services.Interfaces;
+using WTS.Validators;
 using WTS.ViewModels;
 using WTS.Views;
 
@@ -17,6 +18,7 @@ namespace WTS
         private void ConfigureServices(IServiceCollection services)
         {
             services.AddTransient<IFileService, FileService>();
+            services.AddTransient<GeneralAnimalValidator>();
 
             services.AddTransient<WTSViewModel>();
         }

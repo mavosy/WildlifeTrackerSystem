@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using WTS.Enums;
 using WTS.Models.AnimalBase;
+using WTS.Utilities;
 
 namespace WTS.Models.Mammals
 {
@@ -16,9 +17,13 @@ namespace WTS.Models.Mammals
         [Range(0, 4, ErrorMessage = "Must be between 0 and 4")]
         protected int NumberOfLegs { get; set; }
 
-        public override string ToString()
+        public override IEnumerable<KeyValuePair<string, ValueWrapper>> GetPropertiesAsKeyValuePairs()
         {
-            return $"{base.ToString()}, Number of legs: {NumberOfLegs}";
+            foreach (KeyValuePair<string, ValueWrapper> keyValuePair in base.GetPropertiesAsKeyValuePairs())
+            {
+                yield return keyValuePair;
+            }
+            yield return new KeyValuePair<string, ValueWrapper>("NumberOfLegs", ValueWrapper.Create(NumberOfLegs));
         }
     }
 }
