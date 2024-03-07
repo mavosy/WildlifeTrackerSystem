@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using WTS.Enums;
+﻿using WTS.Enums;
 using WTS.Utilities;
 
 namespace WTS.Models.AnimalBase
@@ -21,29 +20,23 @@ namespace WTS.Models.AnimalBase
         /// <summary>
         /// Set automatically at creation
         /// </summary>
-        [StringLength(5)]
         protected string Id { get; set; }
 
         /// <summary>
         /// Nullable, defaults to "No Name"
         /// </summary>
-        [StringLength(50, ErrorMessage = "Name must be 50 characters or less")]
         protected string? Name { get; set; }
 
         /// <summary>
         /// Nullable, defaults to null
         /// </summary>
-        [Range(0, 600, ErrorMessage = "Must be between 0 and 600")]
-        [RegularExpression("^[0-9]*$", ErrorMessage = "Age must be a numeric value")]
         protected int? Age { get; set; }
 
-        [Required(ErrorMessage = "This information is required")]
         protected GenderType Gender { get; set; }
 
         /// <summary>
         /// Set automatically at the category level of inheritance
         /// </summary>
-        [Required(ErrorMessage = "This information is required")]
         protected CategoryType Category { get; set; }
 
         /// <summary>

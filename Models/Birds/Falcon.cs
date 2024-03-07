@@ -1,12 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-using WTS.Enums;
+﻿using WTS.Enums;
 using WTS.Utilities;
 
 namespace WTS.Models.Birds
 {
     internal class Falcon : Bird
     {
-        public Falcon(string id, string? name, int? age, GenderType gender, bool migratory, int divingSpeed) 
+        public Falcon(string id, string? name, int? age, GenderType gender, bool migratory, int divingSpeed)
             : base(id, name, age, gender, migratory)
         {
             DivingSpeed = divingSpeed;
@@ -15,8 +14,6 @@ namespace WTS.Models.Birds
         /// <summary>
         /// Top speed while diving, in km/h
         /// </summary>
-        [Required(ErrorMessage = "This information is required")]
-        [Range(0, 400, ErrorMessage = "Must be between 0 and 400")]
         public int DivingSpeed { get; set; }
 
         public override IEnumerable<KeyValuePair<string, ValueWrapper>> GetPropertiesAsKeyValuePairs()

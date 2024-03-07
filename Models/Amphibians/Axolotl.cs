@@ -1,12 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-using WTS.Enums;
+﻿using WTS.Enums;
 using WTS.Utilities;
 
 namespace WTS.Models.Amphibians
 {
     internal class Axolotl : Amphibian
     {
-        public Axolotl(string id, string? name, int? age, GenderType gender, bool landliving, double regenerationRate) 
+        public Axolotl(string id, string? name, int? age, GenderType gender, bool landliving, double regenerationRate)
             : base(id, name, age, gender, landliving)
         {
             RegenerationRate = regenerationRate;
@@ -15,8 +14,6 @@ namespace WTS.Models.Amphibians
         /// <summary>
         /// Regrowth in millimeters per day
         /// </summary>
-        [Required]
-        [Range(0.0, 1.0, ErrorMessage ="Must be between 0.0 and 1.0 mm/day")]
         public double RegenerationRate { get; set; }
 
         public override IEnumerable<KeyValuePair<string, ValueWrapper>> GetPropertiesAsKeyValuePairs()
