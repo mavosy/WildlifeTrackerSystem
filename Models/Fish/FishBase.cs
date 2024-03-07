@@ -4,7 +4,7 @@ using WTS.Utilities;
 
 namespace WTS.Models.Fish
 {
-    internal abstract class Fish : Animal
+    public abstract class Fish : Animal
     {
         protected Fish(string id, string? name, int? age, GenderType gender, WaterHabitatType habitat = WaterHabitatType.Unknown)
             : base(id, CategoryType.Fish, gender, name, age)

@@ -3,7 +3,7 @@ using WTS.Utilities;
 
 namespace WTS.Models.Insects
 {
-    internal class Ladybug : Insect
+    public class Ladybug : Insect
     {
         public Ladybug(string id, string? name, int? age, GenderType gender, bool canFly, int numberOfSpots)
             : base(id, name, age, gender, canFly)

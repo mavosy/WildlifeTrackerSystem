@@ -2,7 +2,7 @@
 
 namespace WTS.Services.Interfaces
 {
-    internal interface IFileService
+    public interface IFileService
     {
         public string? OpenFileDialog(string filter);
 

@@ -28,7 +28,7 @@ namespace WTS.ViewModels
     /// <summary>
     /// Represents the main ViewModel for the application, handling interactions between the View and the Model as part of the MVVM pattern.
     /// </summary>
-    class WTSViewModel : BaseViewModel, INotifyDataErrorInfo
+    public class WTSViewModel : BaseViewModel, INotifyDataErrorInfo
     {
         // Constants
         private const string ImageFilters = "Image files (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png";
@@ -438,11 +438,6 @@ namespace WTS.ViewModels
         /// </summary>
         protected void ValidateProperty([CallerMemberName] string? propertyName = null)
         {
-            if (propertyName == null)
-            {
-                throw new ArgumentNullException(nameof(propertyName), "Property name cannot be null.");
-            }
-
             var results = _generalAnimalValidator.Validate(this, options => options.IncludeProperties(propertyName));
             bool errorsChanged = false;
 

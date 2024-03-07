@@ -6,7 +6,7 @@ namespace WTS.Models.AnimalBase
     /// <summary>
     /// Base class for all animal models
     /// </summary>
-    internal abstract class Animal : IAnimal
+    public abstract class Animal : IAnimal
     {
         protected Animal(string id, CategoryType categoryType, GenderType genderType = GenderType.Unknown, string? name = "No name", int? age = null)
         {

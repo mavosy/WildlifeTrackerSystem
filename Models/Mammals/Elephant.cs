@@ -3,7 +3,7 @@ using WTS.Utilities;
 
 namespace WTS.Models.Mammals
 {
-    internal class Elephant : Mammal
+    public class Elephant : Mammal
     {
         public Elephant(string id, string? name, int? age, GenderType gender, int numberOfLegs, int trunkLength)
             : base(id, name, age, gender, numberOfLegs)

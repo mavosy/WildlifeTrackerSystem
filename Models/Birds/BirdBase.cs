@@ -4,7 +4,7 @@ using WTS.Utilities;
 
 namespace WTS.Models.Birds
 {
-    internal abstract class Bird : Animal
+    public abstract class Bird : Animal
     {
         protected Bird(string id, string? name, int? age, GenderType gender, bool migratory)
             : base(id, CategoryType.Bird, gender, name, age)

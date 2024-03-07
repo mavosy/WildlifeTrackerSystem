@@ -4,7 +4,7 @@ using WTS.Utilities;
 
 namespace WTS.Models.Arachnids
 {
-    internal abstract class Arachnid : Animal
+    public abstract class Arachnid : Animal
     {
         protected Arachnid(string id, string? name, int? age, GenderType gender, bool venomous)
             : base(id, CategoryType.Arachnid, gender, name, age)

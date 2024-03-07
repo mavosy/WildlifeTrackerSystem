@@ -3,7 +3,7 @@ using WTS.Utilities;
 
 namespace WTS.Models.Arachnids
 {
-    internal class Scorpion : Arachnid
+    public class Scorpion : Arachnid
     {
         public Scorpion(string id, string? name, int? age, GenderType gender, bool venomous, bool nocturnal)
             : base(id, name, age, gender, venomous)

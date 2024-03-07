@@ -1,28 +1,31 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!--Styling for input errors for textboxes-->
-    <Style x:Key="ErrorTextBoxStyle" TargetType="TextBox" >
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!--  Styling for input errors for textboxes  -->
+    <Style x:Key="ErrorTextBoxStyle" TargetType="TextBox">
         <Setter Property="Validation.ErrorTemplate">
             <Setter.Value>
                 <ControlTemplate>
                     <DockPanel>
                         <Border BorderBrush="Red" BorderThickness="1">
-                            <AdornedElementPlaceholder/>
+                            <AdornedElementPlaceholder />
                         </Border>
                     </DockPanel>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
-    <!--Styling for input errors for error popup-->
+    <!--  Styling for input errors for error popup  -->
     <Style x:Key="ValidationErrorPopupBorderStyle" TargetType="Border">
-        <Setter Property="Background" Value="#FF333333"/>
-        <Setter Property="BorderBrush" Value="DimGray"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="5"/>
+        <Setter Property="Background" Value="#FF333333" />
+        <Setter Property="BorderBrush" Value="DimGray" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="5" />
         <Setter Property="Effect">
             <Setter.Value>
-                <DropShadowEffect Color="DimGray" Opacity="0.5" BlurRadius="5" Direction="5"/>
+                <DropShadowEffect
+                    BlurRadius="5"
+                    Direction="5"
+                    Opacity="0.5"
+                    Color="DimGray" />
             </Setter.Value>
         </Setter>
     </Style>

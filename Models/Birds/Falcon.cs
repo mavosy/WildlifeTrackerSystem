@@ -3,7 +3,7 @@ using WTS.Utilities;
 
 namespace WTS.Models.Birds
 {
-    internal class Falcon : Bird
+    public class Falcon : Bird
     {
         public Falcon(string id, string? name, int? age, GenderType gender, bool migratory, int divingSpeed)
             : base(id, name, age, gender, migratory)

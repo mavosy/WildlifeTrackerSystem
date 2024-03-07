@@ -3,7 +3,7 @@ using WTS.Utilities;
 
 namespace WTS.Models.Fish
 {
-    internal class Shark : Fish
+    public class Shark : Fish
     {
         public Shark(string id, string? name, int? age, GenderType gender, WaterHabitatType habitat, int numberOfGills)
             : base(id, name, age, gender, habitat)

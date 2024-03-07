@@ -6,7 +6,7 @@ namespace WTS.Validators
     /// <summary>
     /// Provides validation rules for various properties of the WTSViewModel related to different animal types.
     /// </summary>
-    internal class GeneralAnimalValidator : AbstractValidator<WTSViewModel>
+    public class GeneralAnimalValidator : AbstractValidator<WTSViewModel>
     {
         /// <summary>
         /// Initializes validation rules for properties.
