@@ -21,5 +21,10 @@ namespace WTS.Models.Fish
             }
             yield return new KeyValuePair<string, ValueWrapper>("NumberOfGills", ValueWrapper.Create(NumberOfGills));
         }
+
+        public override string GetAnimalSoundAsString()
+        {
+            return "Silent";
+        }
     }
 }

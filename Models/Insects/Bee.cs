@@ -21,5 +21,10 @@ namespace WTS.Models.Insects
             }
             yield return new KeyValuePair<string, ValueWrapper>("Solitary", ValueWrapper.Create(Solitary));
         }
+
+        public override string GetAnimalSoundAsString()
+        {
+            return "Buzz";
+        }
     }
 }

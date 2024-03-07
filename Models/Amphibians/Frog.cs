@@ -21,5 +21,10 @@ namespace WTS.Models.Amphibians
             }
             yield return new KeyValuePair<string, ValueWrapper>("Color", ValueWrapper.Create(Color));
         }
+
+        public override string GetAnimalSoundAsString()
+        {
+            return "Croak";
+        }
     }
 }

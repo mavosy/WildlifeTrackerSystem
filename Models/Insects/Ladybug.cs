@@ -21,5 +21,10 @@ namespace WTS.Models.Insects
             }
             yield return new KeyValuePair<string, ValueWrapper>("NumberOfSpots", ValueWrapper.Create(NumberOfSpots));
         }
+
+        public override string GetAnimalSoundAsString()
+        {
+            return "Silent";
+        }
     }
 }

@@ -21,5 +21,10 @@ namespace WTS.Models.Reptiles
             }
             yield return new KeyValuePair<string, ValueWrapper>("MaxAgeInYears", ValueWrapper.Create(MaxAgeInYears));
         }
+
+        public override string GetAnimalSoundAsString()
+        {
+            return "Silent";
+        }
     }
 }

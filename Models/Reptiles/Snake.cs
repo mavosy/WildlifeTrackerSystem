@@ -21,5 +21,10 @@ namespace WTS.Models.Reptiles
             }
             yield return new KeyValuePair<string, ValueWrapper>("SelectedHuntingTechnique", ValueWrapper.Create(HuntingTechnique));
         }
+
+        public override string GetAnimalSoundAsString()
+        {
+            return "Hiss";
+        }
     }
 }

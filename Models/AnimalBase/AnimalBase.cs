@@ -6,7 +6,7 @@ namespace WTS.Models.AnimalBase
     /// <summary>
     /// Base class for all animal models
     /// </summary>
-    internal abstract class Animal
+    internal abstract class Animal : IAnimal
     {
         protected Animal(string id, CategoryType categoryType, GenderType genderType = GenderType.Unknown, string? name = "No name", int? age = null)
         {
@@ -20,24 +20,24 @@ namespace WTS.Models.AnimalBase
         /// <summary>
         /// Set automatically at creation
         /// </summary>
-        protected string Id { get; set; }
+        public string Id { get; set; }
 
         /// <summary>
         /// Nullable, defaults to "No Name"
         /// </summary>
-        protected string? Name { get; set; }
+        public string? Name { get; set; }
 
         /// <summary>
         /// Nullable, defaults to null
         /// </summary>
-        protected int? Age { get; set; }
+        public int? Age { get; set; }
 
-        protected GenderType Gender { get; set; }
+        public GenderType Gender { get; set; }
 
         /// <summary>
         /// Set automatically at the category level of inheritance
         /// </summary>
-        protected CategoryType Category { get; set; }
+        public CategoryType Category { get; set; }
 
         /// <summary>
         /// Retrieves a collection of properties for the current object represented as key-value pairs.
@@ -52,5 +52,12 @@ namespace WTS.Models.AnimalBase
             yield return new KeyValuePair<string, ValueWrapper>("Gender", ValueWrapper.Create(Gender));
             yield return new KeyValuePair<string, ValueWrapper>("Category", ValueWrapper.Create(Category));
         }
+
+        /// <summary>
+        /// An abstract method that gets the sound of the specific species of animal.
+        /// If the aninmal is known to be mostly silent or not have an characteristic sound it will return "Silent".
+        /// </summary>
+        /// <returns>A string representation of the animals sound</returns>
+        public abstract string GetAnimalSoundAsString();
     }
 }

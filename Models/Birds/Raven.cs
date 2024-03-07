@@ -21,5 +21,10 @@ namespace WTS.Models.Birds
             }
             yield return new KeyValuePair<string, ValueWrapper>("HasHatchling", ValueWrapper.Create(HasHatchling));
         }
+
+        public override string GetAnimalSoundAsString()
+        {
+            return "Caw";
+        }
     }
 }
