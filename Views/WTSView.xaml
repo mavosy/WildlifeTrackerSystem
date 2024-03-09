@@ -8,7 +8,7 @@
         xmlns:vm="clr-namespace:WTS.ViewModels"
         d:DataContext="{d:DesignInstance {x:Type vm:WTSViewModel}}"
         mc:Ignorable="d"
-        Title="WildlifeTracker" Height="600" Width="900">
+        Title="WildlifeTracker" Height="746" Width="900">
 
 
     <!--IValueConverter to toggle the visibility of input controllers with a boolean flag-->
