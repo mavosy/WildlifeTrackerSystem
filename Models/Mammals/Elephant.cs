@@ -5,10 +5,12 @@ namespace WTS.Models.Mammals
 {
     public class Elephant : Mammal
     {
+        private FoodSchedule _foodSchedule;
         public Elephant(string id, string? name, int? age, GenderType gender, int numberOfLegs, int trunkLength)
             : base(id, name, age, gender, numberOfLegs)
         {
             TrunkLength = trunkLength;
+            SetFoodSchedule();
         }
 
         /// <summary>
@@ -28,6 +30,20 @@ namespace WTS.Models.Mammals
         public override string GetAnimalSoundAsString()
         {
             return "Trumpet";
+        }
+
+        private void SetFoodSchedule()
+        {
+            _foodSchedule = new FoodSchedule();
+            _foodSchedule.EaterType = EaterType.Herbivore;
+            _foodSchedule.Add("Morning: Flakes and milk");
+            _foodSchedule.Add("Lunch:  Bones and flakes");
+            _foodSchedule.Add("Evening: Any meat dish.");
+        }
+
+        public override FoodSchedule GetFoodSchedule()
+        {
+            return _foodSchedule;
         }
     }
 }

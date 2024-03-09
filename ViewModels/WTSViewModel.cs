@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
@@ -48,8 +49,16 @@ namespace WTS.ViewModels
         private const string Snake = "Snake";
         private const string Tortoise = "Tortoise";
 
+        private const string IdString = "Id";
+        private const string NameString = "Name";
+        private const string AgeString = "Age";
+        private const string CategoryString = "Category";
+        private const string GenderString = "Gender";
+
         // Dependency Injection fields
         private readonly IFileService _fileService;
+        private readonly IAnimalManager _animalManager;
+        private readonly ISortingService<AnimalListItemViewModel> _sortingService;
         private readonly GeneralAnimalValidator _generalAnimalValidator;
 
         // Dictionary fields
@@ -61,10 +70,12 @@ namespace WTS.ViewModels
 
         private readonly Dictionary<string, List<string>?> _validationErrorsMap;
 
+        private readonly Dictionary<string, SortingStateHelper> _sortingStateMap;
+
         // Property fields
         private CategoryType _selectedCategory;
         private string _selectedSpecies;
-        private Animal _selectedAnimal;
+        private AnimalListItemViewModel _selectedAnimal;
         private string? name;
         private int? age;
         private string color;
@@ -80,9 +91,11 @@ namespace WTS.ViewModels
         /// <summary>
         /// Constructor of WTSViewModel, initializes a new instance of the WTSViewModel class.
         /// </summary>
-        public WTSViewModel(IFileService fileService, GeneralAnimalValidator generalAnimalValidator)
+        public WTSViewModel(IFileService fileService, IAnimalManager animalManager, ISortingService<AnimalListItemViewModel> sortingService, GeneralAnimalValidator generalAnimalValidator)
         {
             _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
+            _animalManager = animalManager ?? throw new ArgumentNullException(nameof(animalManager));
+            _sortingService = sortingService ?? throw new ArgumentNullException(nameof(sortingService));
             _generalAnimalValidator = generalAnimalValidator ?? throw new ArgumentNullException(nameof(generalAnimalValidator));
 
             _categoryToSpeciesMap = InitializeCategoryToSpeciesMap();
@@ -93,9 +106,12 @@ namespace WTS.ViewModels
 
             _validationErrorsMap = InitializeValidationErrorMap();
 
+            _sortingStateMap = InitializeSortingStateMap();
+
             InitializeEnumDefaultValues();
             InitializeCollections();
             InitializeCommands();
+            LoadAnimals();
         }
 
         /// <summary>
@@ -115,7 +131,7 @@ namespace WTS.ViewModels
                 _selectedCategory = value;
                 UpdateCategoryInputVisibility();
 
-                if (!IsListAllAnimalsChecked)
+                if (!IsListAllSpeciesChecked)
                 {
                     UpdateAvailableSpeciesForCategory();
                 }
@@ -141,7 +157,17 @@ namespace WTS.ViewModels
         /// SelectedAnimal property represents the currently selected animal in the UI.
         /// When this property is set, it triggers the update of the SelectedAnimalInformation property through the fody attribute.
         /// </summary>
-        public Animal SelectedAnimal { get => _selectedAnimal; set { _selectedAnimal = value; DisplaySelectedAnimalInfo(); } }
+        public AnimalListItemViewModel SelectedAnimal
+        {
+            get => _selectedAnimal;
+            set
+            {
+                _selectedAnimal = value;
+                DisplayAnimalInfo();
+                DisplayAnimalFoodSchedule();
+                DisplayAnimalEaterType();
+            }
+        }
 
         /// <summary>
         /// AvailableCategories is a read-only property that provides a list of all animal categories that are available for selection.
@@ -159,7 +185,7 @@ namespace WTS.ViewModels
         /// Animals is a property that provides a collection of all animals that have been created.
         /// The collection is updated whenever a new animal is created or an existing animal is edited.
         /// </summary>
-        public ObservableCollection<Animal> Animals { get; private set; }
+        public ObservableCollection<AnimalListItemViewModel> Animals { get; private set; }
 
         /// <summary>
         /// Contains information about the selected animal as a collection of key-value pairs, bound to UI Summary element.
@@ -167,6 +193,16 @@ namespace WTS.ViewModels
         /// </summary>
         [DependsOn(nameof(SelectedAnimal))]
         public ObservableCollection<KeyValuePair<string, string>> AnimalInformation { get; private set; }
+
+        /// <summary>
+        /// Contains information about the animals food schedule.
+        /// </summary>
+        public string FoodScheduleInfo { get; private set; }
+
+        /// <summary>
+        /// Contains information about what type of food the animal eats.
+        /// </summary>
+        public string EaterTypeInfo { get; private set; }
 
         /// <summary>
         /// AnimalClass is a static read-only property that provides a list of all animal classes defined in the CategoryType enum.
@@ -204,7 +240,7 @@ namespace WTS.ViewModels
         {
             get
             {
-                return !IsListAllAnimalsChecked;
+                return !IsListAllSpeciesChecked;
             }
         }
 
@@ -218,7 +254,7 @@ namespace WTS.ViewModels
         /// When this property is set, it triggers the update of the Animals collection.
         /// </summary>
         [DependsOn(nameof(IsCategoryEnabled))]
-        public bool IsListAllAnimalsChecked { get; set; }
+        public bool IsListAllSpeciesChecked { get; set; }
 
         /// <summary>
         /// CreateAnimalCommand is a property that provides a command for creating a new animal.
@@ -227,16 +263,18 @@ namespace WTS.ViewModels
         public ICommand CreateAnimalCommand { get; private set; }
 
         /// <summary>
-        /// ListAllAnimalsCommand is a property that provides a command for listing all animals.
+        /// ListAllSpeciesCommand is a property that provides a command for listing all animals.
         /// The command is bound to the "List All Animals" button in the UI, and it updates the Animals collection when executed.
         /// </summary>
-        public ICommand ListAllAnimalsCommand { get; private set; }
+        public ICommand ListAllSpeciesCommand { get; private set; }
 
         /// <summary>
         /// AddAnimalImageCommand is a property that provides a command for adding an image to an animal.
         /// The command is bound to the "Add Image" button in the UI, and it calls the OpenFileDialog and FileToBitmapImage methods when executed.
         /// </summary>
         public ICommand AddAnimalImageCommand { get; private set; }
+
+        public ICommand SortCommand { get; private set; }
 
         //Booleans for UI visibility collapse
         public bool LandlivingVisible { get; set; }
@@ -320,8 +358,10 @@ namespace WTS.ViewModels
                 Animal newAnimal = CreateAnimalFromSelectedSpecies();
                 if (newAnimal is not null)
                 {
-                    Animals.Add(newAnimal);
-                    SelectedAnimal = newAnimal;
+                    _animalManager.Add(newAnimal);
+                    AnimalListItemViewModel listItem = new(newAnimal);
+                    Animals.Add(listItem);
+                    SelectedAnimal = listItem;
                 }
             }
             else
@@ -344,6 +384,13 @@ namespace WTS.ViewModels
                 }
             }
             return null;
+        }
+        private void LoadAnimals()
+        {
+            foreach (Animal animal in _animalManager.GetAllAnimals())
+            {
+                Animals.Add(new AnimalListItemViewModel(animal));
+            }
         }
 
         /// <summary>
@@ -383,23 +430,30 @@ namespace WTS.ViewModels
         /// <summary>
         /// Generates a string representation of the properties of the currently selected animal with an inherited KeyValuePair.
         /// </summary>
-        private void DisplaySelectedAnimalInfo()
+        private void DisplayAnimalInfo()
         {
-            if (SelectedAnimal is not null)
+            AnimalInformation.Clear();
+            foreach (KeyValuePair<string, ValueWrapper> keyValuePair in SelectedAnimal.GetPropertiesAsKeyValuePairs())
             {
-                AnimalInformation.Clear();
-                foreach (KeyValuePair<string, ValueWrapper> keyValuePair in SelectedAnimal.GetPropertiesAsKeyValuePairs())
-                {
-                    string keyWithColon = keyValuePair.Key + ':';
-                    KeyValuePair<string, string> keyValueStringPair = new KeyValuePair<string, string>(keyWithColon, keyValuePair.Value.ToString());
-                    AnimalInformation.Add(keyValueStringPair);
-                }
+                string keyWithColon = keyValuePair.Key + ':';
+                KeyValuePair<string, string> keyValueStringPair = new KeyValuePair<string, string>(keyWithColon, keyValuePair.Value.ToString());
+                AnimalInformation.Add(keyValueStringPair);
             }
         }
 
-        private void OnIsListAllAnimalsCheckedChanged()
+        private void DisplayAnimalFoodSchedule()
         {
-            if (IsListAllAnimalsChecked)
+            FoodScheduleInfo = SelectedAnimal.Animal.GetFoodSchedule().ToString();
+        }
+
+        private void DisplayAnimalEaterType()
+        {
+            EaterTypeInfo = $"Eater type: {SelectedAnimal.Animal.GetFoodSchedule().EaterType}";
+        }
+
+        private void OnIsListAllSpeciesCheckedChanged()
+        {
+            if (IsListAllSpeciesChecked)
             {
                 AvailableSpecies.Clear();
                 foreach (var speciesList in _categoryToSpeciesMap.Values)
@@ -485,8 +539,9 @@ namespace WTS.ViewModels
         private void InitializeCommands()
         {
             CreateAnimalCommand = new RelayCommand(_ => CreateAnimal());
-            ListAllAnimalsCommand = new RelayCommand(_ => OnIsListAllAnimalsCheckedChanged());
+            ListAllSpeciesCommand = new RelayCommand(_ => OnIsListAllSpeciesCheckedChanged());
             AddAnimalImageCommand = new RelayCommand(_ => DisplayImage());
+            SortCommand = new RelayCommand(SortByColumn);
         }
 
         /// <summary>
@@ -495,7 +550,7 @@ namespace WTS.ViewModels
         private void InitializeCollections()
         {
             AvailableSpecies = new ObservableCollection<string>();
-            Animals = new ObservableCollection<Animal>();
+            Animals = new ObservableCollection<AnimalListItemViewModel>();
             AnimalInformation = new ObservableCollection<KeyValuePair<string, string>>();
         }
 
@@ -534,6 +589,47 @@ namespace WTS.ViewModels
                 setVisibility?.Invoke();
             }
         }
+
+
+        private void SortByColumn(object parameter)
+        {
+            if (parameter is string propertyName)
+            {
+                UpdateSortDescriptors(propertyName);
+
+                var sortExpression = GetSortExpression(propertyName);
+                Animals = _sortingService.Sort(Animals, sortExpression, _sortingStateMap[propertyName].SortingState);
+            }
+        }
+        private Expression<Func<AnimalListItemViewModel, object>> GetSortExpression(string propertyName)
+        {
+            return propertyName switch
+            {
+                IdString => item => item.Id,
+                NameString => item => item.Name,
+                AgeString => item => item.Age,
+                CategoryString => item => item.Category,
+                GenderString => item => item.Gender,
+                _ => item => item
+            };
+        }
+
+        private void UpdateSortDescriptors(string propertyName)
+        {
+            foreach (var sortingStateValue in _sortingStateMap.Values)
+            {
+                if (sortingStateValue.PropertyName != propertyName)
+                {
+                    sortingStateValue.SortingState = SortingState.NotSorted;
+                }
+            }
+
+            var currentDescriptor = _sortingStateMap[propertyName];
+            currentDescriptor.SortingState = currentDescriptor.SortingState == SortingState.Ascending
+                                      ? SortingState.Descending
+                                      : SortingState.Ascending;
+        }
+
 
         /// <summary>
         /// Resets the visibility of all category-related input fields to their default state.
@@ -650,6 +746,18 @@ namespace WTS.ViewModels
                 [Elephant] = () => TrunkLengthVisible = true,
                 [Snake] = () => HuntingTechniqueVisible = true,
                 [Tortoise] = () => MaxAgeInYearsVisible = true,
+            };
+        }
+
+        private Dictionary<string, SortingStateHelper> InitializeSortingStateMap()
+        {
+            return new Dictionary<string, SortingStateHelper>
+            {
+                [IdString] = new SortingStateHelper { PropertyName = IdString, SortingState = SortingState.NotSorted },
+                [NameString] = new SortingStateHelper { PropertyName = NameString, SortingState = SortingState.NotSorted },
+                [AgeString] = new SortingStateHelper { PropertyName = AgeString, SortingState = SortingState.NotSorted },
+                [CategoryString] = new SortingStateHelper { PropertyName = CategoryString, SortingState = SortingState.NotSorted },
+                [GenderString] = new SortingStateHelper { PropertyName = GenderString, SortingState = SortingState.NotSorted },
             };
         }
 

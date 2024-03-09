@@ -5,10 +5,13 @@ namespace WTS.Models.Insects
 {
     public class Bee : Insect
     {
-        public Bee(string id, string? name, int? age, GenderType gender, bool canFly, bool solitary) 
+        private FoodSchedule _foodSchedule;
+
+        public Bee(string id, string? name, int? age, GenderType gender, bool canFly, bool solitary)
             : base(id, name, age, gender, canFly)
         {
             Solitary = solitary;
+            SetFoodSchedule();
         }
 
         public bool Solitary { get; set; }
@@ -25,6 +28,20 @@ namespace WTS.Models.Insects
         public override string GetAnimalSoundAsString()
         {
             return "Buzz";
+        }
+
+        private void SetFoodSchedule()
+        {
+            _foodSchedule = new FoodSchedule();
+            _foodSchedule.EaterType = EaterType.Herbivore;
+            _foodSchedule.Add("Morning: Flakes and milk");
+            _foodSchedule.Add("Lunch:  Bones and flakes");
+            _foodSchedule.Add("Evening: Any meat dish.");
+        }
+
+        public override FoodSchedule GetFoodSchedule()
+        {
+            return _foodSchedule;
         }
     }
 }

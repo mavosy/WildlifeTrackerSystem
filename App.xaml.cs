@@ -18,6 +18,8 @@ namespace WTS
         private void ConfigureServices(IServiceCollection services)
         {
             services.AddTransient<IFileService, FileService>();
+            services.AddTransient<IAnimalManager, AnimalManager>();
+            services.AddTransient<ISortingService<AnimalListItemViewModel>, SortingService<AnimalListItemViewModel>>();
             services.AddTransient<GeneralAnimalValidator>();
 
             services.AddTransient<WTSViewModel>();

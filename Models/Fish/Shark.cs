@@ -9,6 +9,7 @@ namespace WTS.Models.Fish
             : base(id, name, age, gender, habitat)
         {
             NumberOfGills = numberOfGills;
+            SetFoodSchedule();
         }
 
         public int NumberOfGills { get; set; }
@@ -25,6 +26,21 @@ namespace WTS.Models.Fish
         public override string GetAnimalSoundAsString()
         {
             return "Silent";
+        }
+
+        private FoodSchedule _foodSchedule;
+        private void SetFoodSchedule()
+        {
+            _foodSchedule = new FoodSchedule();
+            _foodSchedule.EaterType = EaterType.Carnivore;
+            _foodSchedule.Add("Morning: Flakes and milk");
+            _foodSchedule.Add("Lunch:  Bones and flakes");
+            _foodSchedule.Add("Evening: Any meat dish.");
+        }
+
+        public override FoodSchedule GetFoodSchedule()
+        {
+            return _foodSchedule;
         }
     }
 }
