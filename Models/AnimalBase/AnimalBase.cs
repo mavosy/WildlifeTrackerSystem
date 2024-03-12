@@ -59,5 +59,11 @@ namespace WTS.Models.AnimalBase
         /// </summary>
         /// <returns>A string representation of the animals sound</returns>
         public abstract string GetAnimalSoundAsString();
+
+        /// <summary>
+        /// Gets the food schedule for the animal.
+        /// </summary>
+        /// <returns>A FoodSchedule object representing the Animal's feeding schedule.</returns>
+        public abstract FoodSchedule GetFoodSchedule();
     }
 }

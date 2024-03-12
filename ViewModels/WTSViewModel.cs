@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
@@ -22,6 +23,7 @@ using WTS.Models.Reptiles;
 using WTS.Services.Interfaces;
 using WTS.Utilities;
 using WTS.Validators;
+using WTS.ViewModels.Comparers;
 
 namespace WTS.ViewModels
 {
@@ -50,6 +52,7 @@ namespace WTS.ViewModels
 
         // Dependency Injection fields
         private readonly IFileService _fileService;
+        private readonly IAnimalManager _animalManager;
         private readonly GeneralAnimalValidator _generalAnimalValidator;
 
         // Dictionary fields
@@ -64,25 +67,27 @@ namespace WTS.ViewModels
         // Property fields
         private CategoryType _selectedCategory;
         private string _selectedSpecies;
-        private Animal _selectedAnimal;
+        private AnimalListItemViewModel _selectedAnimal;
+
         private string? name;
         private int? age;
-        private string color;
-        private double regenerationRate;
-        private int divingSpeed;
-        private int numberOfGills;
-        private int numberOfSpots;
-        private int numberOfLegs;
-        private string breed;
-        private int trunkLength;
-        private int maxAgeInYears;
+        private string? color;
+        private double? regenerationRate;
+        private int? divingSpeed;
+        private int? numberOfGills;
+        private int? numberOfSpots;
+        private int? numberOfLegs;
+        private string? breed;
+        private int? trunkLength;
+        private int? maxAgeInYears;
 
         /// <summary>
         /// Constructor of WTSViewModel, initializes a new instance of the WTSViewModel class.
         /// </summary>
-        public WTSViewModel(IFileService fileService, GeneralAnimalValidator generalAnimalValidator)
+        public WTSViewModel(IFileService fileService, IAnimalManager animalManager, GeneralAnimalValidator generalAnimalValidator)
         {
             _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
+            _animalManager = animalManager ?? throw new ArgumentNullException(nameof(animalManager));
             _generalAnimalValidator = generalAnimalValidator ?? throw new ArgumentNullException(nameof(generalAnimalValidator));
 
             _categoryToSpeciesMap = InitializeCategoryToSpeciesMap();
@@ -96,6 +101,7 @@ namespace WTS.ViewModels
             InitializeEnumDefaultValues();
             InitializeCollections();
             InitializeCommands();
+            LoadAnimals();
         }
 
         /// <summary>
@@ -114,8 +120,9 @@ namespace WTS.ViewModels
             {
                 _selectedCategory = value;
                 UpdateCategoryInputVisibility();
+                ResetCategoryInputValue();
 
-                if (!IsListAllAnimalsChecked)
+                if (!IsListAllSpeciesChecked)
                 {
                     UpdateAvailableSpeciesForCategory();
                 }
@@ -133,6 +140,7 @@ namespace WTS.ViewModels
             {
                 _selectedSpecies = value;
                 UpdateSpeciesInputVisibility();
+                ResetSpeciesInputValue();
                 SelectedCategory = FindCategoryForSpecies(value);
             }
         }
@@ -141,7 +149,17 @@ namespace WTS.ViewModels
         /// SelectedAnimal property represents the currently selected animal in the UI.
         /// When this property is set, it triggers the update of the SelectedAnimalInformation property through the fody attribute.
         /// </summary>
-        public Animal SelectedAnimal { get => _selectedAnimal; set { _selectedAnimal = value; DisplaySelectedAnimalInfo(); } }
+        public AnimalListItemViewModel SelectedAnimal
+        {
+            get => _selectedAnimal;
+            set
+            {
+                _selectedAnimal = value;
+                DisplayAnimalInfo();
+                DisplayAnimalFoodSchedule();
+                DisplayAnimalEaterType();
+            }
+        }
 
         /// <summary>
         /// AvailableCategories is a read-only property that provides a list of all animal categories that are available for selection.
@@ -159,7 +177,7 @@ namespace WTS.ViewModels
         /// Animals is a property that provides a collection of all animals that have been created.
         /// The collection is updated whenever a new animal is created or an existing animal is edited.
         /// </summary>
-        public ObservableCollection<Animal> Animals { get; private set; }
+        public ObservableCollection<AnimalListItemViewModel> Animals { get; private set; }
 
         /// <summary>
         /// Contains information about the selected animal as a collection of key-value pairs, bound to UI Summary element.
@@ -167,6 +185,16 @@ namespace WTS.ViewModels
         /// </summary>
         [DependsOn(nameof(SelectedAnimal))]
         public ObservableCollection<KeyValuePair<string, string>> AnimalInformation { get; private set; }
+
+        /// <summary>
+        /// Contains information about the animals food schedule.
+        /// </summary>
+        public string FoodScheduleInfo { get; private set; }
+
+        /// <summary>
+        /// Contains information about what type of food the animal eats.
+        /// </summary>
+        public string EaterTypeInfo { get; private set; }
 
         /// <summary>
         /// AnimalClass is a static read-only property that provides a list of all animal classes defined in the CategoryType enum.
@@ -204,7 +232,7 @@ namespace WTS.ViewModels
         {
             get
             {
-                return !IsListAllAnimalsChecked;
+                return !IsListAllSpeciesChecked;
             }
         }
 
@@ -218,25 +246,32 @@ namespace WTS.ViewModels
         /// When this property is set, it triggers the update of the Animals collection.
         /// </summary>
         [DependsOn(nameof(IsCategoryEnabled))]
-        public bool IsListAllAnimalsChecked { get; set; }
+        public bool IsListAllSpeciesChecked { get; set; }
 
         /// <summary>
-        /// CreateAnimalCommand is a property that provides a command for creating a new animal.
+        /// Provides a command for creating a new animal.
         /// The command is bound to the "Create Animal" button in the UI, and it calls the CreateAnimal method when executed.
         /// </summary>
         public ICommand CreateAnimalCommand { get; private set; }
 
         /// <summary>
-        /// ListAllAnimalsCommand is a property that provides a command for listing all animals.
+        /// Provides a command for listing all animals.
         /// The command is bound to the "List All Animals" button in the UI, and it updates the Animals collection when executed.
         /// </summary>
-        public ICommand ListAllAnimalsCommand { get; private set; }
+        public ICommand ListAllSpeciesCommand { get; private set; }
 
         /// <summary>
-        /// AddAnimalImageCommand is a property that provides a command for adding an image to an animal.
+        /// Provides a command for adding an image to an animal.
         /// The command is bound to the "Add Image" button in the UI, and it calls the OpenFileDialog and FileToBitmapImage methods when executed.
         /// </summary>
         public ICommand AddAnimalImageCommand { get; private set; }
+
+        /// <summary>
+        /// Provides a command for sorting animals in the UI ListView of created animals.
+        /// The command is bound to the headers of the ListView, provides a string object of the property to be sorted, 
+        /// and calls the SortAnimals method when executed.
+        /// </summary>
+        public ICommand SortCommand { get; private set; }
 
         //Booleans for UI visibility collapse
         public bool LandlivingVisible { get; set; }
@@ -275,8 +310,8 @@ namespace WTS.ViewModels
 
         // Amphibian
         public bool Landliving { get; set; }
-        public string Color { get => color; set { color = value; ValidateProperty(); } }
-        public double RegenerationRate { get => regenerationRate; set { regenerationRate = value; ValidateProperty(); } }
+        public string? Color { get => color; set { color = value; ValidateProperty(); } }
+        public double? RegenerationRate { get => regenerationRate; set { regenerationRate = value; ValidateProperty(); } }
 
         // Arachnid
         public bool Venomous { get; set; }
@@ -286,32 +321,33 @@ namespace WTS.ViewModels
         // Bird
         public bool Migratory { get; set; }
         public bool HasHatchling { get; set; }
-        public int DivingSpeed { get => divingSpeed; set { divingSpeed = value; ValidateProperty(); } }
+        public int? DivingSpeed { get => divingSpeed; set { divingSpeed = value; ValidateProperty(); } }
 
         // Fish
         public WaterHabitatType SelectedWaterType { get; set; }
         public bool HasBeenCaught { get; set; }
-        public int NumberOfGills { get => numberOfGills; set { numberOfGills = value; ValidateProperty(); } }
+        public int? NumberOfGills { get => numberOfGills; set { numberOfGills = value; ValidateProperty(); } }
 
         // Insect
         public bool CanFly { get; set; }
         public bool Solitary { get; set; }
-        public int NumberOfSpots { get => numberOfSpots; set { numberOfSpots = value; ValidateProperty(); } }
+        public int? NumberOfSpots { get => numberOfSpots; set { numberOfSpots = value; ValidateProperty(); } }
 
         // Mammal
-        public int NumberOfLegs { get => numberOfLegs; set { numberOfLegs = value; ValidateProperty(); } }
-        public string Breed { get => breed; set { breed = value; ValidateProperty(); } }
-        public int TrunkLength { get => trunkLength; set { trunkLength = value; ValidateProperty(); } }
+        public int? NumberOfLegs { get => numberOfLegs; set { numberOfLegs = value; ValidateProperty(); } }
+        public string? Breed { get => breed; set { breed = value; ValidateProperty(); } }
+        public int? TrunkLength { get => trunkLength; set { trunkLength = value; ValidateProperty(); } }
 
         // Reptile
         public bool HasScales { get; set; }
         public HuntingTechniqueType SelectedHuntingTechnique { get; set; }
-        public int MaxAgeInYears { get => maxAgeInYears; set { maxAgeInYears = value; ValidateProperty(); } }
+        public int? MaxAgeInYears { get => maxAgeInYears; set { maxAgeInYears = value; ValidateProperty(); } }
 
         #endregion
 
         /// <summary>
-        /// Creates a new animal and adds it to the collection.
+        /// Creates a new animal, encapsulates it in a AnimalListItemViewModel object,
+        /// adds it to a list in AnimalManager, and sets SelectedAnimal to the newly created animal.
         /// </summary>
         private void CreateAnimal()
         {
@@ -320,8 +356,10 @@ namespace WTS.ViewModels
                 Animal newAnimal = CreateAnimalFromSelectedSpecies();
                 if (newAnimal is not null)
                 {
-                    Animals.Add(newAnimal);
-                    SelectedAnimal = newAnimal;
+                    AnimalListItemViewModel listItem = new(newAnimal);
+                    _animalManager.Add(listItem);
+                    Animals.Add(listItem);
+                    SelectedAnimal = listItem;
                 }
             }
             else
@@ -344,6 +382,18 @@ namespace WTS.ViewModels
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Provides created animal objects from the AnimalManager, encapsulated in a AnimalListItemViewModel object,
+        /// to a collection bound to the UI.
+        /// </summary>
+        private void LoadAnimals()
+        {
+            foreach (AnimalListItemViewModel animalItem in _animalManager.GetAllAnimals())
+            {
+                Animals.Add(animalItem);
+            }
         }
 
         /// <summary>
@@ -383,23 +433,42 @@ namespace WTS.ViewModels
         /// <summary>
         /// Generates a string representation of the properties of the currently selected animal with an inherited KeyValuePair.
         /// </summary>
-        private void DisplaySelectedAnimalInfo()
+        private void DisplayAnimalInfo()
         {
-            if (SelectedAnimal is not null)
+            AnimalInformation.Clear();
+            foreach (KeyValuePair<string, ValueWrapper> keyValuePair in SelectedAnimal.GetPropertiesAsKeyValuePairs())
             {
-                AnimalInformation.Clear();
-                foreach (KeyValuePair<string, ValueWrapper> keyValuePair in SelectedAnimal.GetPropertiesAsKeyValuePairs())
-                {
-                    string keyWithColon = keyValuePair.Key + ':';
-                    KeyValuePair<string, string> keyValueStringPair = new KeyValuePair<string, string>(keyWithColon, keyValuePair.Value.ToString());
-                    AnimalInformation.Add(keyValueStringPair);
-                }
+                string keyWithColon = keyValuePair.Key + ':';
+                string value = keyValuePair.Value.Value is null ? "Not entered"
+                                                          : keyValuePair.Value.ToString();
+
+                KeyValuePair<string, string> keyValueStringPair = new KeyValuePair<string, string>(keyWithColon, value);
+                AnimalInformation.Add(keyValueStringPair);
             }
         }
 
-        private void OnIsListAllAnimalsCheckedChanged()
+        /// <summary>
+        /// Displays the currently selected animal's food schedule.
+        /// </summary>
+        private void DisplayAnimalFoodSchedule()
         {
-            if (IsListAllAnimalsChecked)
+            FoodScheduleInfo = SelectedAnimal.Animal.GetFoodSchedule().ToString();
+        }
+
+        /// <summary>
+        /// Displays the currently selected animal's food consumption category.
+        /// </summary>
+        private void DisplayAnimalEaterType()
+        {
+            EaterTypeInfo = $"Eater type: {SelectedAnimal.Animal.GetFoodSchedule().EaterType}";
+        }
+
+        /// <summary>
+        /// Shows all available species in the UI.
+        /// </summary>
+        private void OnIsListAllSpeciesCheckedChanged()
+        {
+            if (IsListAllSpeciesChecked)
             {
                 AvailableSpecies.Clear();
                 foreach (var speciesList in _categoryToSpeciesMap.Values)
@@ -485,8 +554,9 @@ namespace WTS.ViewModels
         private void InitializeCommands()
         {
             CreateAnimalCommand = new RelayCommand(_ => CreateAnimal());
-            ListAllAnimalsCommand = new RelayCommand(_ => OnIsListAllAnimalsCheckedChanged());
+            ListAllSpeciesCommand = new RelayCommand(_ => OnIsListAllSpeciesCheckedChanged());
             AddAnimalImageCommand = new RelayCommand(_ => DisplayImage());
+            SortCommand = new RelayCommand(SortAnimals);
         }
 
         /// <summary>
@@ -495,7 +565,7 @@ namespace WTS.ViewModels
         private void InitializeCollections()
         {
             AvailableSpecies = new ObservableCollection<string>();
-            Animals = new ObservableCollection<Animal>();
+            Animals = new ObservableCollection<AnimalListItemViewModel>();
             AnimalInformation = new ObservableCollection<KeyValuePair<string, string>>();
         }
 
@@ -536,6 +606,16 @@ namespace WTS.ViewModels
         }
 
         /// <summary>
+        /// Sorts the animals in the ListView according to rules provided by their respective Comparer classes.
+        /// </summary>
+        /// <param name="parameter">An object containing information about which property name header is clicked in the ListView</param>
+        private void SortAnimals(object parameter)
+        {
+            var sortedAnimals = _animalManager.SortAnimalList(parameter);
+            Animals = new ObservableCollection<AnimalListItemViewModel>(sortedAnimals);
+        }
+
+        /// <summary>
         /// Resets the visibility of all category-related input fields to their default state.
         /// </summary>
         private void ResetCategoryInputVisibility()
@@ -568,6 +648,41 @@ namespace WTS.ViewModels
             TrunkLengthVisible = false;
             HuntingTechniqueVisible = false;
             MaxAgeInYearsVisible = false;
+        }
+
+        /// <summary>
+        /// Resets the input value of all category-related input fields to their default state.
+        /// </summary>
+        private void ResetCategoryInputValue()
+        {
+            Landliving = false;
+            Venomous = false;
+            Migratory = false;
+            SelectedWaterType = WaterHabitatType.Unknown;
+            CanFly = false;
+            NumberOfLegs = null;
+            HasScales = false;
+        }
+
+        /// <summary>
+        /// Resets the input value of all species-related input fields to their default state.
+        /// </summary>
+        private void ResetSpeciesInputValue()
+        {
+            Color = null;
+            RegenerationRate = null;
+            WebWeaving = false;
+            Nocturnal = false;
+            HasHatchling = false;
+            DivingSpeed = null;
+            HasBeenCaught = false;
+            NumberOfGills = null;
+            Solitary = false;
+            NumberOfSpots = null;
+            Breed = null;
+            TrunkLength = null;
+            SelectedHuntingTechnique = HuntingTechniqueType.Unknown;
+            MaxAgeInYears = null;
         }
 
         /// <summary>

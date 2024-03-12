@@ -13,6 +13,9 @@ using WTS.Models.Reptiles;
 
 namespace WTS.Services
 {
+    /// <summary>
+    /// Beginning of refactoring of Animal object creation to a builder
+    /// </summary>
     public class AnimalBuilder
     {
         private const string Frog = "Frog";

@@ -5,10 +5,13 @@ namespace WTS.Models.Birds
 {
     public class Raven : Bird
     {
-        public Raven(string id, string? name, int? age, GenderType gender, bool migratory, bool hasHatchling) 
+        private FoodSchedule _foodSchedule;
+
+        public Raven(string id, string? name, int? age, GenderType gender, bool migratory, bool hasHatchling)
             : base(id, name, age, gender, migratory)
         {
             HasHatchling = hasHatchling;
+            SetFoodSchedule();
         }
 
         public bool HasHatchling { get; set; }
@@ -25,6 +28,21 @@ namespace WTS.Models.Birds
         public override string GetAnimalSoundAsString()
         {
             return "Caw";
+        }
+
+        /// <summary>
+        /// Sets the food schedule and food consumption category for the animal.
+        /// </summary>
+        private void SetFoodSchedule()
+        {
+            _foodSchedule = new FoodSchedule();
+            _foodSchedule.EaterType = EaterType.Carnivore;
+            _foodSchedule.InitializeSchedule();
+        }
+
+        public override FoodSchedule GetFoodSchedule()
+        {
+            return _foodSchedule;
         }
     }
 }

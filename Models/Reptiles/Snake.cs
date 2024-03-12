@@ -5,10 +5,13 @@ namespace WTS.Models.Reptiles
 {
     public class Snake : Reptile
     {
-        public Snake(string id, string? name, int? age, GenderType gender, bool hasScales, HuntingTechniqueType huntingTechnique = HuntingTechniqueType.Unknown) 
+        private FoodSchedule _foodSchedule;
+
+        public Snake(string id, string? name, int? age, GenderType gender, bool hasScales, HuntingTechniqueType huntingTechnique = HuntingTechniqueType.Unknown)
             : base(id, name, age, gender, hasScales)
         {
             HuntingTechnique = huntingTechnique;
+            SetFoodSchedule();
         }
 
         public HuntingTechniqueType HuntingTechnique { get; set; }
@@ -25,6 +28,21 @@ namespace WTS.Models.Reptiles
         public override string GetAnimalSoundAsString()
         {
             return "Hiss";
+        }
+
+        /// <summary>
+        /// Sets the food schedule and food consumption category for the animal.
+        /// </summary>
+        private void SetFoodSchedule()
+        {
+            _foodSchedule = new FoodSchedule();
+            _foodSchedule.EaterType = EaterType.Carnivore;
+            _foodSchedule.InitializeSchedule();
+        }
+
+        public override FoodSchedule GetFoodSchedule()
+        {
+            return _foodSchedule;
         }
     }
 }

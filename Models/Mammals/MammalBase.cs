@@ -6,13 +6,13 @@ namespace WTS.Models.Mammals
 {
     public abstract class Mammal : Animal
     {
-        protected Mammal(string id, string? name, int? age, GenderType gender, int numberOfLegs)
+        protected Mammal(string id, string? name, int? age, GenderType gender, int? numberOfLegs)
             : base(id, CategoryType.Mammal, gender, name, age)
         {
             NumberOfLegs = numberOfLegs;
         }
 
-        protected int NumberOfLegs { get; set; }
+        protected int? NumberOfLegs { get; set; }
 
         public override IEnumerable<KeyValuePair<string, ValueWrapper>> GetPropertiesAsKeyValuePairs()
         {

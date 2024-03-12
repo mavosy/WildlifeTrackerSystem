@@ -12,5 +12,6 @@ namespace WTS.Models.AnimalBase
         CategoryType Category { get; set; }
         IEnumerable<KeyValuePair<string, ValueWrapper>> GetPropertiesAsKeyValuePairs();
         string GetAnimalSoundAsString();
+        FoodSchedule GetFoodSchedule();
     }
 }

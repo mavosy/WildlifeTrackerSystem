@@ -19,29 +19,28 @@ namespace WTS.Validators
             RuleFor(wtsViewModel => wtsViewModel.Age).MustBeValidNullableInteger(wtsViewModel => false);
 
             // Rules for Amphibian inputs
-            RuleFor(wtsViewModel => wtsViewModel.Color).MustBeValidString(wtsViewModel => true);
-            RuleFor(wtsViewModel => wtsViewModel.RegenerationRate).MustBeValidDouble(wtsViewModel => true);
+            RuleFor(wtsViewModel => wtsViewModel.Color).MustBeValidNullableString(wtsViewModel => false);
+            RuleFor(wtsViewModel => wtsViewModel.RegenerationRate).MustBeValidNullableDouble(wtsViewModel => false);
 
             // Rules for Arachnid inputs
             // [PLACEHOLDER]
 
             // Rules for Bird inputs
-            RuleFor(wtsViewModel => wtsViewModel.DivingSpeed).MustBeValidInteger(wtsViewModel => true);
+            RuleFor(wtsViewModel => wtsViewModel.DivingSpeed).MustBeValidNullableInteger(wtsViewModel => false);
 
             // Rules for Fish inputs
-            RuleFor(wtsViewModel => wtsViewModel.NumberOfGills).MustBeValidInteger(wtsViewModel => true);
+            RuleFor(wtsViewModel => wtsViewModel.NumberOfGills).MustBeValidNullableInteger(wtsViewModel => false);
 
             // Rules for Insect inputs
-            RuleFor(wtsViewModel => wtsViewModel.NumberOfSpots).MustBeValidInteger(wtsViewModel => true);
-
+            RuleFor(wtsViewModel => wtsViewModel.NumberOfSpots).MustBeValidNullableInteger(wtsViewModel => false);
 
             // Rules for Mammal inputs
-            RuleFor(wtsViewModel => wtsViewModel.NumberOfLegs).MustBeValidInteger(wtsViewModel => true);
-            RuleFor(wtsViewModel => wtsViewModel.Breed).MustBeValidString(wtsViewModel => true);
-            RuleFor(wtsViewModel => wtsViewModel.TrunkLength).MustBeValidInteger(wtsViewModel => true);
+            RuleFor(wtsViewModel => wtsViewModel.NumberOfLegs).MustBeValidNullableInteger(wtsViewModel => false);
+            RuleFor(wtsViewModel => wtsViewModel.Breed).MustBeValidNullableString(wtsViewModel => false);
+            RuleFor(wtsViewModel => wtsViewModel.TrunkLength).MustBeValidNullableInteger(wtsViewModel => false);
 
             // Rules for Reptiles inputs
-            RuleFor(wtsViewModel => wtsViewModel.MaxAgeInYears).MustBeValidInteger(wtsViewModel => true);
+            RuleFor(wtsViewModel => wtsViewModel.MaxAgeInYears).MustBeValidNullableInteger(wtsViewModel => false);
         }
     }
 }
