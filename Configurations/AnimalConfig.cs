@@ -2,6 +2,9 @@
 
 namespace WTS.Configurations
 {
+    /// <summary>
+    /// Configuration for Animal Builder
+    /// </summary>
     public class AnimalConfig
     {
         // Animal

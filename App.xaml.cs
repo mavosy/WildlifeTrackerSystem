@@ -15,29 +15,28 @@ namespace WTS
     {
         public IServiceProvider ServiceProvider { get; private set; }
 
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            var serviceCollection = new ServiceCollection();
+            ConfigureServices(serviceCollection);
+            ServiceProvider = serviceCollection.BuildServiceProvider();
+
+            var viewModelLocator = new ViewModelLocator(ServiceProvider);
+            Resources.Add("ViewModelLocator", viewModelLocator);
+
+            var wtsView = new WTSView();
+            wtsView.Show();
+
+            base.OnStartup(e);
+        }
+
         private void ConfigureServices(IServiceCollection services)
         {
             services.AddTransient<IFileService, FileService>();
             services.AddTransient<IAnimalManager, AnimalManager>();
-            services.AddTransient<ISortingService<AnimalListItemViewModel>, SortingService<AnimalListItemViewModel>>();
             services.AddTransient<GeneralAnimalValidator>();
 
             services.AddTransient<WTSViewModel>();
-        }
-
-        protected override void OnStartup(StartupEventArgs e)
-        {
-            ServiceCollection serviceCollection = new();
-            ConfigureServices(serviceCollection);
-            ServiceProvider = serviceCollection.BuildServiceProvider();
-
-            var wtsView = new WTSView
-            {
-                DataContext = ServiceProvider.GetRequiredService<WTSViewModel>()
-            };
-            wtsView.Show();
-
-            base.OnStartup(e);
         }
     }
 }

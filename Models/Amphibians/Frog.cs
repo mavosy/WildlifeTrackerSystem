@@ -7,14 +7,14 @@ namespace WTS.Models.Amphibians
     {
         private FoodSchedule _foodSchedule;
 
-        public Frog(string id, string? name, int? age, GenderType gender, bool landliving, string color)
+        public Frog(string id, string? name, int? age, GenderType gender, bool landliving, string? color)
             : base(id, name, age, gender, landliving)
         {
             Color = color;
             SetFoodSchedule();
         }
 
-        public string Color { get; set; }
+        public string? Color { get; set; }
 
         public override IEnumerable<KeyValuePair<string, ValueWrapper>> GetPropertiesAsKeyValuePairs()
         {
@@ -30,13 +30,14 @@ namespace WTS.Models.Amphibians
             return "Croak";
         }
 
+        /// <summary>
+        /// Sets the food schedule and food consumption category for the animal.
+        /// </summary>
         private void SetFoodSchedule()
         {
             _foodSchedule = new FoodSchedule();
             _foodSchedule.EaterType = EaterType.Carnivore;
-            _foodSchedule.Add("Morning: Flakes and milk");
-            _foodSchedule.Add("Lunch:  Bones and flakes");
-            _foodSchedule.Add("Evening: Any meat dish.");
+            _foodSchedule.InitializeSchedule();
         }
 
         public override FoodSchedule GetFoodSchedule()

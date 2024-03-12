@@ -23,6 +23,7 @@ using WTS.Models.Reptiles;
 using WTS.Services.Interfaces;
 using WTS.Utilities;
 using WTS.Validators;
+using WTS.ViewModels.Comparers;
 
 namespace WTS.ViewModels
 {
@@ -49,16 +50,9 @@ namespace WTS.ViewModels
         private const string Snake = "Snake";
         private const string Tortoise = "Tortoise";
 
-        private const string IdString = "Id";
-        private const string NameString = "Name";
-        private const string AgeString = "Age";
-        private const string CategoryString = "Category";
-        private const string GenderString = "Gender";
-
         // Dependency Injection fields
         private readonly IFileService _fileService;
         private readonly IAnimalManager _animalManager;
-        private readonly ISortingService<AnimalListItemViewModel> _sortingService;
         private readonly GeneralAnimalValidator _generalAnimalValidator;
 
         // Dictionary fields
@@ -70,32 +64,30 @@ namespace WTS.ViewModels
 
         private readonly Dictionary<string, List<string>?> _validationErrorsMap;
 
-        private readonly Dictionary<string, SortingStateHelper> _sortingStateMap;
-
         // Property fields
         private CategoryType _selectedCategory;
         private string _selectedSpecies;
         private AnimalListItemViewModel _selectedAnimal;
+
         private string? name;
         private int? age;
-        private string color;
-        private double regenerationRate;
-        private int divingSpeed;
-        private int numberOfGills;
-        private int numberOfSpots;
-        private int numberOfLegs;
-        private string breed;
-        private int trunkLength;
-        private int maxAgeInYears;
+        private string? color;
+        private double? regenerationRate;
+        private int? divingSpeed;
+        private int? numberOfGills;
+        private int? numberOfSpots;
+        private int? numberOfLegs;
+        private string? breed;
+        private int? trunkLength;
+        private int? maxAgeInYears;
 
         /// <summary>
         /// Constructor of WTSViewModel, initializes a new instance of the WTSViewModel class.
         /// </summary>
-        public WTSViewModel(IFileService fileService, IAnimalManager animalManager, ISortingService<AnimalListItemViewModel> sortingService, GeneralAnimalValidator generalAnimalValidator)
+        public WTSViewModel(IFileService fileService, IAnimalManager animalManager, GeneralAnimalValidator generalAnimalValidator)
         {
             _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
             _animalManager = animalManager ?? throw new ArgumentNullException(nameof(animalManager));
-            _sortingService = sortingService ?? throw new ArgumentNullException(nameof(sortingService));
             _generalAnimalValidator = generalAnimalValidator ?? throw new ArgumentNullException(nameof(generalAnimalValidator));
 
             _categoryToSpeciesMap = InitializeCategoryToSpeciesMap();
@@ -105,8 +97,6 @@ namespace WTS.ViewModels
             _speciesVisibilityMap = InitializeSpeciesVisibilityMap();
 
             _validationErrorsMap = InitializeValidationErrorMap();
-
-            _sortingStateMap = InitializeSortingStateMap();
 
             InitializeEnumDefaultValues();
             InitializeCollections();
@@ -130,6 +120,7 @@ namespace WTS.ViewModels
             {
                 _selectedCategory = value;
                 UpdateCategoryInputVisibility();
+                ResetCategoryInputValue();
 
                 if (!IsListAllSpeciesChecked)
                 {
@@ -149,6 +140,7 @@ namespace WTS.ViewModels
             {
                 _selectedSpecies = value;
                 UpdateSpeciesInputVisibility();
+                ResetSpeciesInputValue();
                 SelectedCategory = FindCategoryForSpecies(value);
             }
         }
@@ -257,23 +249,28 @@ namespace WTS.ViewModels
         public bool IsListAllSpeciesChecked { get; set; }
 
         /// <summary>
-        /// CreateAnimalCommand is a property that provides a command for creating a new animal.
+        /// Provides a command for creating a new animal.
         /// The command is bound to the "Create Animal" button in the UI, and it calls the CreateAnimal method when executed.
         /// </summary>
         public ICommand CreateAnimalCommand { get; private set; }
 
         /// <summary>
-        /// ListAllSpeciesCommand is a property that provides a command for listing all animals.
+        /// Provides a command for listing all animals.
         /// The command is bound to the "List All Animals" button in the UI, and it updates the Animals collection when executed.
         /// </summary>
         public ICommand ListAllSpeciesCommand { get; private set; }
 
         /// <summary>
-        /// AddAnimalImageCommand is a property that provides a command for adding an image to an animal.
+        /// Provides a command for adding an image to an animal.
         /// The command is bound to the "Add Image" button in the UI, and it calls the OpenFileDialog and FileToBitmapImage methods when executed.
         /// </summary>
         public ICommand AddAnimalImageCommand { get; private set; }
 
+        /// <summary>
+        /// Provides a command for sorting animals in the UI ListView of created animals.
+        /// The command is bound to the headers of the ListView, provides a string object of the property to be sorted, 
+        /// and calls the SortAnimals method when executed.
+        /// </summary>
         public ICommand SortCommand { get; private set; }
 
         //Booleans for UI visibility collapse
@@ -313,8 +310,8 @@ namespace WTS.ViewModels
 
         // Amphibian
         public bool Landliving { get; set; }
-        public string Color { get => color; set { color = value; ValidateProperty(); } }
-        public double RegenerationRate { get => regenerationRate; set { regenerationRate = value; ValidateProperty(); } }
+        public string? Color { get => color; set { color = value; ValidateProperty(); } }
+        public double? RegenerationRate { get => regenerationRate; set { regenerationRate = value; ValidateProperty(); } }
 
         // Arachnid
         public bool Venomous { get; set; }
@@ -324,32 +321,33 @@ namespace WTS.ViewModels
         // Bird
         public bool Migratory { get; set; }
         public bool HasHatchling { get; set; }
-        public int DivingSpeed { get => divingSpeed; set { divingSpeed = value; ValidateProperty(); } }
+        public int? DivingSpeed { get => divingSpeed; set { divingSpeed = value; ValidateProperty(); } }
 
         // Fish
         public WaterHabitatType SelectedWaterType { get; set; }
         public bool HasBeenCaught { get; set; }
-        public int NumberOfGills { get => numberOfGills; set { numberOfGills = value; ValidateProperty(); } }
+        public int? NumberOfGills { get => numberOfGills; set { numberOfGills = value; ValidateProperty(); } }
 
         // Insect
         public bool CanFly { get; set; }
         public bool Solitary { get; set; }
-        public int NumberOfSpots { get => numberOfSpots; set { numberOfSpots = value; ValidateProperty(); } }
+        public int? NumberOfSpots { get => numberOfSpots; set { numberOfSpots = value; ValidateProperty(); } }
 
         // Mammal
-        public int NumberOfLegs { get => numberOfLegs; set { numberOfLegs = value; ValidateProperty(); } }
-        public string Breed { get => breed; set { breed = value; ValidateProperty(); } }
-        public int TrunkLength { get => trunkLength; set { trunkLength = value; ValidateProperty(); } }
+        public int? NumberOfLegs { get => numberOfLegs; set { numberOfLegs = value; ValidateProperty(); } }
+        public string? Breed { get => breed; set { breed = value; ValidateProperty(); } }
+        public int? TrunkLength { get => trunkLength; set { trunkLength = value; ValidateProperty(); } }
 
         // Reptile
         public bool HasScales { get; set; }
         public HuntingTechniqueType SelectedHuntingTechnique { get; set; }
-        public int MaxAgeInYears { get => maxAgeInYears; set { maxAgeInYears = value; ValidateProperty(); } }
+        public int? MaxAgeInYears { get => maxAgeInYears; set { maxAgeInYears = value; ValidateProperty(); } }
 
         #endregion
 
         /// <summary>
-        /// Creates a new animal and adds it to the collection.
+        /// Creates a new animal, encapsulates it in a AnimalListItemViewModel object,
+        /// adds it to a list in AnimalManager, and sets SelectedAnimal to the newly created animal.
         /// </summary>
         private void CreateAnimal()
         {
@@ -358,8 +356,8 @@ namespace WTS.ViewModels
                 Animal newAnimal = CreateAnimalFromSelectedSpecies();
                 if (newAnimal is not null)
                 {
-                    _animalManager.Add(newAnimal);
                     AnimalListItemViewModel listItem = new(newAnimal);
+                    _animalManager.Add(listItem);
                     Animals.Add(listItem);
                     SelectedAnimal = listItem;
                 }
@@ -385,11 +383,16 @@ namespace WTS.ViewModels
             }
             return null;
         }
+
+        /// <summary>
+        /// Provides created animal objects from the AnimalManager, encapsulated in a AnimalListItemViewModel object,
+        /// to a collection bound to the UI.
+        /// </summary>
         private void LoadAnimals()
         {
-            foreach (Animal animal in _animalManager.GetAllAnimals())
+            foreach (AnimalListItemViewModel animalItem in _animalManager.GetAllAnimals())
             {
-                Animals.Add(new AnimalListItemViewModel(animal));
+                Animals.Add(animalItem);
             }
         }
 
@@ -436,21 +439,33 @@ namespace WTS.ViewModels
             foreach (KeyValuePair<string, ValueWrapper> keyValuePair in SelectedAnimal.GetPropertiesAsKeyValuePairs())
             {
                 string keyWithColon = keyValuePair.Key + ':';
-                KeyValuePair<string, string> keyValueStringPair = new KeyValuePair<string, string>(keyWithColon, keyValuePair.Value.ToString());
+                string value = keyValuePair.Value.Value is null ? "Not entered"
+                                                          : keyValuePair.Value.ToString();
+
+                KeyValuePair<string, string> keyValueStringPair = new KeyValuePair<string, string>(keyWithColon, value);
                 AnimalInformation.Add(keyValueStringPair);
             }
         }
 
+        /// <summary>
+        /// Displays the currently selected animal's food schedule.
+        /// </summary>
         private void DisplayAnimalFoodSchedule()
         {
             FoodScheduleInfo = SelectedAnimal.Animal.GetFoodSchedule().ToString();
         }
 
+        /// <summary>
+        /// Displays the currently selected animal's food consumption category.
+        /// </summary>
         private void DisplayAnimalEaterType()
         {
             EaterTypeInfo = $"Eater type: {SelectedAnimal.Animal.GetFoodSchedule().EaterType}";
         }
 
+        /// <summary>
+        /// Shows all available species in the UI.
+        /// </summary>
         private void OnIsListAllSpeciesCheckedChanged()
         {
             if (IsListAllSpeciesChecked)
@@ -541,7 +556,7 @@ namespace WTS.ViewModels
             CreateAnimalCommand = new RelayCommand(_ => CreateAnimal());
             ListAllSpeciesCommand = new RelayCommand(_ => OnIsListAllSpeciesCheckedChanged());
             AddAnimalImageCommand = new RelayCommand(_ => DisplayImage());
-            SortCommand = new RelayCommand(SortByColumn);
+            SortCommand = new RelayCommand(SortAnimals);
         }
 
         /// <summary>
@@ -590,46 +605,15 @@ namespace WTS.ViewModels
             }
         }
 
-
-        private void SortByColumn(object parameter)
+        /// <summary>
+        /// Sorts the animals in the ListView according to rules provided by their respective Comparer classes.
+        /// </summary>
+        /// <param name="parameter">An object containing information about which property name header is clicked in the ListView</param>
+        private void SortAnimals(object parameter)
         {
-            if (parameter is string propertyName)
-            {
-                UpdateSortDescriptors(propertyName);
-
-                var sortExpression = GetSortExpression(propertyName);
-                Animals = _sortingService.Sort(Animals, sortExpression, _sortingStateMap[propertyName].SortingState);
-            }
+            var sortedAnimals = _animalManager.SortAnimalList(parameter);
+            Animals = new ObservableCollection<AnimalListItemViewModel>(sortedAnimals);
         }
-        private Expression<Func<AnimalListItemViewModel, object>> GetSortExpression(string propertyName)
-        {
-            return propertyName switch
-            {
-                IdString => item => item.Id,
-                NameString => item => item.Name,
-                AgeString => item => item.Age,
-                CategoryString => item => item.Category,
-                GenderString => item => item.Gender,
-                _ => item => item
-            };
-        }
-
-        private void UpdateSortDescriptors(string propertyName)
-        {
-            foreach (var sortingStateValue in _sortingStateMap.Values)
-            {
-                if (sortingStateValue.PropertyName != propertyName)
-                {
-                    sortingStateValue.SortingState = SortingState.NotSorted;
-                }
-            }
-
-            var currentDescriptor = _sortingStateMap[propertyName];
-            currentDescriptor.SortingState = currentDescriptor.SortingState == SortingState.Ascending
-                                      ? SortingState.Descending
-                                      : SortingState.Ascending;
-        }
-
 
         /// <summary>
         /// Resets the visibility of all category-related input fields to their default state.
@@ -664,6 +648,41 @@ namespace WTS.ViewModels
             TrunkLengthVisible = false;
             HuntingTechniqueVisible = false;
             MaxAgeInYearsVisible = false;
+        }
+
+        /// <summary>
+        /// Resets the input value of all category-related input fields to their default state.
+        /// </summary>
+        private void ResetCategoryInputValue()
+        {
+            Landliving = false;
+            Venomous = false;
+            Migratory = false;
+            SelectedWaterType = WaterHabitatType.Unknown;
+            CanFly = false;
+            NumberOfLegs = null;
+            HasScales = false;
+        }
+
+        /// <summary>
+        /// Resets the input value of all species-related input fields to their default state.
+        /// </summary>
+        private void ResetSpeciesInputValue()
+        {
+            Color = null;
+            RegenerationRate = null;
+            WebWeaving = false;
+            Nocturnal = false;
+            HasHatchling = false;
+            DivingSpeed = null;
+            HasBeenCaught = false;
+            NumberOfGills = null;
+            Solitary = false;
+            NumberOfSpots = null;
+            Breed = null;
+            TrunkLength = null;
+            SelectedHuntingTechnique = HuntingTechniqueType.Unknown;
+            MaxAgeInYears = null;
         }
 
         /// <summary>
@@ -746,18 +765,6 @@ namespace WTS.ViewModels
                 [Elephant] = () => TrunkLengthVisible = true,
                 [Snake] = () => HuntingTechniqueVisible = true,
                 [Tortoise] = () => MaxAgeInYearsVisible = true,
-            };
-        }
-
-        private Dictionary<string, SortingStateHelper> InitializeSortingStateMap()
-        {
-            return new Dictionary<string, SortingStateHelper>
-            {
-                [IdString] = new SortingStateHelper { PropertyName = IdString, SortingState = SortingState.NotSorted },
-                [NameString] = new SortingStateHelper { PropertyName = NameString, SortingState = SortingState.NotSorted },
-                [AgeString] = new SortingStateHelper { PropertyName = AgeString, SortingState = SortingState.NotSorted },
-                [CategoryString] = new SortingStateHelper { PropertyName = CategoryString, SortingState = SortingState.NotSorted },
-                [GenderString] = new SortingStateHelper { PropertyName = GenderString, SortingState = SortingState.NotSorted },
             };
         }
 

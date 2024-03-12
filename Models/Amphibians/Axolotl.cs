@@ -7,7 +7,7 @@ namespace WTS.Models.Amphibians
     {
         private FoodSchedule _foodSchedule;
 
-        public Axolotl(string id, string? name, int? age, GenderType gender, bool landliving, double regenerationRate)
+        public Axolotl(string id, string? name, int? age, GenderType gender, bool landliving, double? regenerationRate)
             : base(id, name, age, gender, landliving)
         {
             RegenerationRate = regenerationRate;
@@ -17,7 +17,7 @@ namespace WTS.Models.Amphibians
         /// <summary>
         /// Regrowth in millimeters per day
         /// </summary>
-        public double RegenerationRate { get; set; }
+        public double? RegenerationRate { get; set; }
 
         public override IEnumerable<KeyValuePair<string, ValueWrapper>> GetPropertiesAsKeyValuePairs()
         {
@@ -33,13 +33,14 @@ namespace WTS.Models.Amphibians
             return "Silent";
         }
 
+        /// <summary>
+        /// Sets the food schedule and food consumption category for the animal.
+        /// </summary>
         private void SetFoodSchedule()
         {
             _foodSchedule = new FoodSchedule();
             _foodSchedule.EaterType = EaterType.Carnivore;
-            _foodSchedule.Add("Morning: Flakes and milk");
-            _foodSchedule.Add("Lunch:  Bones and flakes");
-            _foodSchedule.Add("Evening: Any meat dish.");
+            _foodSchedule.InitializeSchedule();
         }
 
         public override FoodSchedule GetFoodSchedule()

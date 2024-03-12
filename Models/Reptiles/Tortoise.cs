@@ -7,14 +7,14 @@ namespace WTS.Models.Reptiles
     {
         private FoodSchedule _foodSchedule;
 
-        public Tortoise(string id, string? name, int? age, GenderType gender, bool hasScales, int maxAgeInYears)
+        public Tortoise(string id, string? name, int? age, GenderType gender, bool hasScales, int? maxAgeInYears)
             : base(id, name, age, gender, hasScales)
         {
             MaxAgeInYears = maxAgeInYears;
             SetFoodSchedule();
         }
 
-        public int MaxAgeInYears { get; set; }
+        public int? MaxAgeInYears { get; set; }
 
         public override IEnumerable<KeyValuePair<string, ValueWrapper>> GetPropertiesAsKeyValuePairs()
         {
@@ -30,13 +30,14 @@ namespace WTS.Models.Reptiles
             return "Silent";
         }
 
+        /// <summary>
+        /// Sets the food schedule and food consumption category for the animal.
+        /// </summary>
         private void SetFoodSchedule()
         {
             _foodSchedule = new FoodSchedule();
             _foodSchedule.EaterType = EaterType.Herbivore;
-            _foodSchedule.Add("Morning: Flakes and milk");
-            _foodSchedule.Add("Lunch:  Bones and flakes");
-            _foodSchedule.Add("Evening: Any meat dish.");
+            _foodSchedule.InitializeSchedule();
         }
 
         public override FoodSchedule GetFoodSchedule()

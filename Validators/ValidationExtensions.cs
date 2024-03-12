@@ -33,7 +33,6 @@ namespace WTS.Validators
         public static IRuleBuilderOptions<T, string?> MustBeValidNullableString<T>(this IRuleBuilder<T, string?> ruleBuilder, Func<T, bool> isRequired)
         {
             return ruleBuilder
-                .NotEmpty().WithMessage("This field is required.").When(isRequired)
                 .MaximumLength(100).WithMessage("Must be less than 100 characters.")
                 .Must(BeFreeOfMaliciousContent).WithMessage("Invalid content detected.");
         }
@@ -62,8 +61,7 @@ namespace WTS.Validators
         public static IRuleBuilderOptions<T, int?> MustBeValidNullableInteger<T>(this IRuleBuilder<T, int?> ruleBuilder, Func<T, bool> isRequired)
         {
             return ruleBuilder
-                .NotEmpty().WithMessage("This field is required.").When(isRequired)
-                .Must(value => !value.HasValue || value.Value > 0).WithMessage("Must be a positive number.");
+                .Must(value => !value.HasValue || value.Value >= 0).WithMessage("Must be a positive number.");
         }
 
         /// <summary>
@@ -90,8 +88,7 @@ namespace WTS.Validators
         public static IRuleBuilderOptions<T, double?> MustBeValidNullableDouble<T>(this IRuleBuilder<T, double?> ruleBuilder, Func<T, bool> isRequired)
         {
             return ruleBuilder
-                .NotEmpty().WithMessage("This field is required.").When(isRequired)
-                .Must(value => !value.HasValue || value.Value > 0).WithMessage("Must be a positive number.");
+                .Must(value => !value.HasValue || value.Value >= 0.0).WithMessage("Must be a positive number.");
         }
 
         /// <summary>
