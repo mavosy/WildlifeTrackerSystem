@@ -390,10 +390,14 @@ namespace WTS.ViewModels
         /// </summary>
         private void LoadAnimals()
         {
-            foreach (AnimalListItemViewModel animalItem in _animalManager.GetAllAnimals())
+            var currentlySelectedAnimal = SelectedAnimal;
+            Animals.Clear();
+            int animalListLength = _animalManager.CountAnimals();
+            for (int i = 0; i < animalListLength; i++)
             {
-                Animals.Add(animalItem);
+                Animals.Add(_animalManager.GetAnimalAt(i));
             }
+            SelectedAnimal = currentlySelectedAnimal;
         }
 
         /// <summary>
@@ -436,14 +440,17 @@ namespace WTS.ViewModels
         private void DisplayAnimalInfo()
         {
             AnimalInformation.Clear();
-            foreach (KeyValuePair<string, ValueWrapper> keyValuePair in SelectedAnimal.GetPropertiesAsKeyValuePairs())
+            if (SelectedAnimal is not null)
             {
-                string keyWithColon = keyValuePair.Key + ':';
-                string value = keyValuePair.Value.Value is null ? "Not entered"
-                                                          : keyValuePair.Value.ToString();
+                foreach (KeyValuePair<string, ValueWrapper> keyValuePair in SelectedAnimal.GetPropertiesAsKeyValuePairs())
+                {
+                    string keyWithColon = keyValuePair.Key + ':';
+                    string value = keyValuePair.Value.Value is null ? "Not entered"
+                                                              : keyValuePair.Value.ToString();
 
-                KeyValuePair<string, string> keyValueStringPair = new KeyValuePair<string, string>(keyWithColon, value);
-                AnimalInformation.Add(keyValueStringPair);
+                    KeyValuePair<string, string> keyValueStringPair = new KeyValuePair<string, string>(keyWithColon, value);
+                    AnimalInformation.Add(keyValueStringPair);
+                }
             }
         }
 
@@ -452,7 +459,10 @@ namespace WTS.ViewModels
         /// </summary>
         private void DisplayAnimalFoodSchedule()
         {
-            FoodScheduleInfo = SelectedAnimal.Animal.GetFoodSchedule().ToString();
+            if (SelectedAnimal is not null)
+            {
+                FoodScheduleInfo = SelectedAnimal.Animal.GetFoodSchedule().ToString(); 
+            }
         }
 
         /// <summary>
@@ -460,7 +470,10 @@ namespace WTS.ViewModels
         /// </summary>
         private void DisplayAnimalEaterType()
         {
-            EaterTypeInfo = $"Eater type: {SelectedAnimal.Animal.GetFoodSchedule().EaterType}";
+            if (SelectedAnimal is not null)
+            {
+                EaterTypeInfo = $"Eater type: {SelectedAnimal.Animal.GetFoodSchedule().EaterType}";
+            }
         }
 
         /// <summary>
@@ -611,8 +624,8 @@ namespace WTS.ViewModels
         /// <param name="parameter">An object containing information about which property name header is clicked in the ListView</param>
         private void SortAnimals(object parameter)
         {
-            var sortedAnimals = _animalManager.SortAnimalList(parameter);
-            Animals = new ObservableCollection<AnimalListItemViewModel>(sortedAnimals);
+            _animalManager.SortAnimalList(parameter);
+            LoadAnimals();
         }
 
         /// <summary>

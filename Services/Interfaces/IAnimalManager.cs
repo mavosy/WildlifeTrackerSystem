@@ -8,10 +8,7 @@ namespace WTS.Services.Interfaces
         int CountAnimals();
         bool Add(AnimalListItemViewModel animalItem);
         AnimalListItemViewModel GetAnimalAt(int index);
-        IEnumerable<AnimalListItemViewModel> GetAllAnimals();
-        IEnumerable<KeyValuePair<string, ValueWrapper>> GetAnimalProperties(int index);
-        IEnumerable<IEnumerable<KeyValuePair<string, ValueWrapper>>> GetAllAnimalProperties();
-        IEnumerable<AnimalListItemViewModel> SortAnimalList(object parameter);
+        void SortAnimalList(object parameter);
         bool IsIndexInRange(int index);
     }
 }
