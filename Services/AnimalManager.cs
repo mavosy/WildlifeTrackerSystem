@@ -54,43 +54,11 @@ namespace WTS.Services
         }
 
         /// <summary>
-        /// Retrieves all AnimalListItemViewModels in the list.
-        /// </summary>
-        /// <returns>An IEnumerable of all AnimalListItemViewModels.</returns>
-        public IEnumerable<AnimalListItemViewModel> GetAllAnimals()
-        {
-            return _animalList;
-        }
-
-        /// <summary>
-        /// Retrieves properties of a specific animal as key-value pairs.
-        /// </summary>
-        /// <param name="index">The index of the animal in the list.</param>
-        /// <returns>An IEnumerable of properties for the specified animal.</returns>
-        public IEnumerable<KeyValuePair<string, ValueWrapper>> GetAnimalProperties(int index)
-        {
-            if (!IsIndexInRange(index))
-            {
-                throw new IndexOutOfRangeException("Index is out of range.");
-            }
-            return _animalList[index].GetPropertiesAsKeyValuePairs();
-        }
-
-        /// <summary>
-        /// Retrieves properties of all animals in the list.
-        /// </summary>
-        /// <returns>An IEnumerable of IEnumerables, each representing a collection of properties for an animal.</returns>
-        public IEnumerable<IEnumerable<KeyValuePair<string, ValueWrapper>>> GetAllAnimalProperties()
-        {
-            return _animalList.Select(animal => animal.GetPropertiesAsKeyValuePairs());
-        }
-
-        /// <summary>
         /// Sorts the list of animals a specified property. First default for all properties
         /// except Age is ascending sort.
         /// </summary>
         /// <param name="parameter">The property to sort the animals by as an object set from UI.</param>
-        public IEnumerable<AnimalListItemViewModel> SortAnimalList(object parameter)
+        public void SortAnimalList(object parameter)
         {
             if (parameter is string sortingProperty)
             {
@@ -108,20 +76,22 @@ namespace WTS.Services
 
                 if (comparer != null)
                 {
-                    var sortedList = new List<AnimalListItemViewModel>(_animalList);
-                    sortedList.Sort(comparer);
-
+                    _animalList.Sort(comparer);
                     if (!_ascendingSort)
                     {
-                        sortedList.Reverse();
+                        _animalList.Reverse();
                     }
-
-                    return sortedList;
                 }
-
-                throw new NullReferenceException("The comparer is null");
+                else
+                {
+                    throw new NullReferenceException("The comparer is null");
+                }
             }
-            throw new ArgumentException("The parameter provided to the sorting method is not a valid string onject");
+            else
+            {
+                throw new ArgumentException("The parameter provided to the sorting method is not a valid string onject");
+            }
+
         }
 
         /// <summary>
