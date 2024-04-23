@@ -1,16 +1,17 @@
-﻿using FluentValidation;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using FluentValidation;
 using PropertyChanged;
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using WTS.Commands;
 using WTS.Enums;
+using WTS.Messages;
 using WTS.Models;
 using WTS.Models.Amphibians;
 using WTS.Models.AnimalBase;
@@ -20,10 +21,11 @@ using WTS.Models.Fish;
 using WTS.Models.Insects;
 using WTS.Models.Mammals;
 using WTS.Models.Reptiles;
+using WTS.Services;
 using WTS.Services.Interfaces;
 using WTS.Utilities;
 using WTS.Validators;
-using WTS.ViewModels.Comparers;
+using WTS.Views;
 
 namespace WTS.ViewModels
 {
@@ -51,8 +53,10 @@ namespace WTS.ViewModels
         private const string Tortoise = "Tortoise";
 
         // Dependency Injection fields
+        private readonly IMessenger _messenger;
         private readonly IFileService _fileService;
         private readonly IAnimalManager _animalManager;
+        private readonly IFoodManager _foodManager;
         private readonly GeneralAnimalValidator _generalAnimalValidator;
 
         // Dictionary fields
@@ -67,7 +71,7 @@ namespace WTS.ViewModels
         // Property fields
         private CategoryType _selectedCategory;
         private string _selectedSpecies;
-        private AnimalListItemViewModel _selectedAnimal;
+        private AnimalListItemViewModel? _selectedAnimal;
 
         private string? name;
         private int? age;
@@ -84,10 +88,12 @@ namespace WTS.ViewModels
         /// <summary>
         /// Constructor of WTSViewModel, initializes a new instance of the WTSViewModel class.
         /// </summary>
-        public WTSViewModel(IFileService fileService, IAnimalManager animalManager, GeneralAnimalValidator generalAnimalValidator)
+        public WTSViewModel(IMessenger messenger, IFileService fileService, IAnimalManager animalManager, IFoodManager foodManager, GeneralAnimalValidator generalAnimalValidator)
         {
+            _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
             _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
             _animalManager = animalManager ?? throw new ArgumentNullException(nameof(animalManager));
+            _foodManager = foodManager ?? throw new ArgumentNullException(nameof(foodManager));
             _generalAnimalValidator = generalAnimalValidator ?? throw new ArgumentNullException(nameof(generalAnimalValidator));
 
             _categoryToSpeciesMap = InitializeCategoryToSpeciesMap();
@@ -99,8 +105,9 @@ namespace WTS.ViewModels
             _validationErrorsMap = InitializeValidationErrorMap();
 
             InitializeEnumDefaultValues();
-            InitializeCollections();
+            SubscribeToMessages();
             InitializeCommands();
+            InitializeCollections();
             LoadAnimals();
         }
 
@@ -149,7 +156,7 @@ namespace WTS.ViewModels
         /// SelectedAnimal property represents the currently selected animal in the UI.
         /// When this property is set, it triggers the update of the SelectedAnimalInformation property through the fody attribute.
         /// </summary>
-        public AnimalListItemViewModel SelectedAnimal
+        public AnimalListItemViewModel? SelectedAnimal
         {
             get => _selectedAnimal;
             set
@@ -160,6 +167,8 @@ namespace WTS.ViewModels
                 DisplayAnimalEaterType();
             }
         }
+
+        public FoodItem SelectedFoodItem { get; set; }
 
         /// <summary>
         /// AvailableCategories is a read-only property that provides a list of all animal categories that are available for selection.
@@ -186,15 +195,17 @@ namespace WTS.ViewModels
         [DependsOn(nameof(SelectedAnimal))]
         public ObservableCollection<KeyValuePair<string, string>> AnimalInformation { get; private set; }
 
+        public ObservableCollection<FoodItem> FoodItems { get; private set; }
+
         /// <summary>
         /// Contains information about the animals food schedule.
         /// </summary>
-        public string FoodScheduleInfo { get; private set; }
+        public string? FoodScheduleInfo { get; private set; }
 
         /// <summary>
         /// Contains information about what type of food the animal eats.
         /// </summary>
-        public string EaterTypeInfo { get; private set; }
+        public string? EaterTypeInfo { get; private set; }
 
         /// <summary>
         /// AnimalClass is a static read-only property that provides a list of all animal classes defined in the CategoryType enum.
@@ -255,6 +266,18 @@ namespace WTS.ViewModels
         public ICommand CreateAnimalCommand { get; private set; }
 
         /// <summary>
+        /// Provides a command for creating a new animal.
+        /// The command is bound to the "Create Animal" button in the UI, and it calls the CreateAnimal method when executed.
+        /// </summary>
+        public ICommand UpdateAnimalCommand { get; private set; }
+
+        /// <summary>
+        /// Provides a command for creating a new animal.
+        /// The command is bound to the "Create Animal" button in the UI, and it calls the CreateAnimal method when executed.
+        /// </summary>
+        public ICommand DeleteAnimalCommand { get; private set; }
+
+        /// <summary>
         /// Provides a command for listing all animals.
         /// The command is bound to the "List All Animals" button in the UI, and it updates the Animals collection when executed.
         /// </summary>
@@ -272,6 +295,13 @@ namespace WTS.ViewModels
         /// and calls the SortAnimals method when executed.
         /// </summary>
         public ICommand SortCommand { get; private set; }
+
+        /// <summary>
+        /// Provides a command for opening a windowed form to handle food items.
+        /// </summary>
+        public ICommand OpenFoodItemViewCommand { get; private set; }
+
+        public ICommand PairAnimalWithFoodItemCommand { get; private set; }
 
         //Booleans for UI visibility collapse
         public bool LandlivingVisible { get; set; }
@@ -356,10 +386,10 @@ namespace WTS.ViewModels
                 Animal newAnimal = CreateAnimalFromSelectedSpecies();
                 if (newAnimal is not null)
                 {
-                    AnimalListItemViewModel listItem = new(newAnimal);
-                    _animalManager.Add(listItem);
-                    Animals.Add(listItem);
-                    SelectedAnimal = listItem;
+                    AnimalListItemViewModel animalListItem = new AnimalListItemViewModel(newAnimal);
+                    _animalManager.Add(animalListItem);
+                    LoadAnimals();
+                    SelectedAnimal = animalListItem;
                 }
             }
             else
@@ -385,19 +415,70 @@ namespace WTS.ViewModels
         }
 
         /// <summary>
+        /// Creates a new animal, encapsulates it in a AnimalListItemViewModel object,
+        /// and replaces the currently selected animal with the newly created one.
+        /// </summary>
+        private void UpdateAnimal()
+        {
+            if (!HasErrors && SelectedAnimal is not null)
+            {
+                Animal newAnimal = CreateAnimalFromSelectedSpecies();
+                if (newAnimal is not null)
+                {
+                    AnimalListItemViewModel animalListItem = new AnimalListItemViewModel(newAnimal);
+
+                    int selectedAnimalIndex = Animals.IndexOf(SelectedAnimal);
+                    _animalManager.Replace(selectedAnimalIndex, animalListItem);
+                    LoadAnimals();
+                    SelectedAnimal = animalListItem;
+                }
+            }
+            else
+            {
+                MessageBox.Show("There are some errors in your input. Please correct them according to the instructions before proceeding.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        /// <summary>
+        /// Deletes the selected animal from the Animals collection
+        /// </summary>
+        private void DeleteAnimal()
+        {
+            if (SelectedAnimal is not null)
+            {
+                int selectedAnimalIndex = Animals.IndexOf(SelectedAnimal);
+                _animalManager.Delete(SelectedAnimal);
+                LoadAnimals();
+
+                SelectedAnimal = Animals.Count > 0
+                    ? Animals[Math.Min(selectedAnimalIndex, Animals.Count - 1)]
+                    : null;
+            }
+        }
+
+        /// <summary>
         /// Provides created animal objects from the AnimalManager, encapsulated in a AnimalListItemViewModel object,
         /// to a collection bound to the UI.
         /// </summary>
         private void LoadAnimals()
         {
             var currentlySelectedAnimal = SelectedAnimal;
-            Animals.Clear();
-            int animalListLength = _animalManager.CountAnimals();
+            if (Animals.Any())
+            {
+                Animals.Clear();
+            }
+            int animalListLength = _animalManager.Count;
             for (int i = 0; i < animalListLength; i++)
             {
-                Animals.Add(_animalManager.GetAnimalAt(i));
+                Animals.Add(_animalManager.GetItemAt(i));
             }
             SelectedAnimal = currentlySelectedAnimal;
+        }
+
+        private void OpenFoodItemView()
+        {
+            var foodItemView = new FoodItemView();
+            foodItemView.ShowDialog();
         }
 
         /// <summary>
@@ -459,9 +540,11 @@ namespace WTS.ViewModels
         /// </summary>
         private void DisplayAnimalFoodSchedule()
         {
+            FoodScheduleInfo = null;
             if (SelectedAnimal is not null)
             {
-                FoodScheduleInfo = SelectedAnimal.Animal.GetFoodSchedule().ToString(); 
+                var foodItems = _foodManager.GetFoodItemsForAnimal(SelectedAnimal.Animal.DisplayName);
+                FoodScheduleInfo = string.Join(", ", foodItems);
             }
         }
 
@@ -470,6 +553,7 @@ namespace WTS.ViewModels
         /// </summary>
         private void DisplayAnimalEaterType()
         {
+            EaterTypeInfo = null;
             if (SelectedAnimal is not null)
             {
                 EaterTypeInfo = $"Eater type: {SelectedAnimal.Animal.GetFoodSchedule().EaterType}";
@@ -567,9 +651,13 @@ namespace WTS.ViewModels
         private void InitializeCommands()
         {
             CreateAnimalCommand = new RelayCommand(_ => CreateAnimal());
+            UpdateAnimalCommand = new RelayCommand(_ => UpdateAnimal());
+            DeleteAnimalCommand = new RelayCommand(_ => DeleteAnimal());
             ListAllSpeciesCommand = new RelayCommand(_ => OnIsListAllSpeciesCheckedChanged());
             AddAnimalImageCommand = new RelayCommand(_ => DisplayImage());
             SortCommand = new RelayCommand(SortAnimals);
+            OpenFoodItemViewCommand = new RelayCommand(_ => OpenFoodItemView());
+            PairAnimalWithFoodItemCommand = new RelayCommand(PairAnimalWithFoodItem);
         }
 
         /// <summary>
@@ -580,6 +668,7 @@ namespace WTS.ViewModels
             AvailableSpecies = new ObservableCollection<string>();
             Animals = new ObservableCollection<AnimalListItemViewModel>();
             AnimalInformation = new ObservableCollection<KeyValuePair<string, string>>();
+            FoodItems = new ObservableCollection<FoodItem>();
         }
 
         /// <summary>
@@ -788,6 +877,20 @@ namespace WTS.ViewModels
         private Dictionary<string, List<string>?> InitializeValidationErrorMap()
         {
             return new Dictionary<string, List<string>?>();
+        }
+
+        private void SubscribeToMessages()
+        {
+            _messenger.Register<FoodItemMessage>(this, (recipient, message) => FoodItems.Add(message.Value));
+        }
+
+        private void PairAnimalWithFoodItem(object obj)
+        {
+            if (SelectedFoodItem is not null && SelectedAnimal is not null)
+            {
+                _foodManager.PairAnimalWithFoodItem(SelectedAnimal.Animal.DisplayName, SelectedFoodItem.Name);
+            }
+            DisplayAnimalFoodSchedule();
         }
     }
 }

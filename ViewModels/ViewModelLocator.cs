@@ -19,5 +19,6 @@ namespace WTS.ViewModels
         }
 
         public WTSViewModel WTSViewModel => _serviceProvider.GetRequiredService<WTSViewModel>();
+        public FoodItemViewModel FoodItemViewModel => _serviceProvider.GetRequiredService<FoodItemViewModel>();
     }
 }

@@ -1,0 +1,54 @@
+﻿<Window x:Class="WTS.Views.FoodItemView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WTS.Views"
+        xmlns:vm="clr-namespace:WTS.ViewModels"
+        xmlns:util="clr-namespace:WTS.Utilities"
+        util:DialogCloser.DialogResult="{Binding DialogResult, Mode=TwoWay}"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance {x:Type vm:FoodItemViewModel}}"
+        DataContext="{Binding FoodItemViewModel, Source={StaticResource ViewModelLocator}}"
+        Title="Fill in ingredients for the meal" Height="450" Width="351">
+    <DockPanel>
+        <Grid DockPanel.Dock="Top" Margin="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel>
+                <GroupBox Header="Meal name" HorizontalAlignment="Center">
+                    <TextBox Grid.Column="0" Name="foodItemNameTextBox" Text="{Binding NameInput}" Margin="10" HorizontalAlignment="Right" Height="23" Width="120"/>
+                </GroupBox>
+
+
+                <GroupBox Header="Add Ingredient to your list">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100*"/>
+                            <ColumnDefinition Width="100*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Label Grid.Column="0" Grid.Row="0" Content="Ingredient" Target="{Binding ElementName=ingredientInputTextBox}" Margin="10" HorizontalAlignment="Center"/>
+                        <TextBox Grid.Column="1" Grid.Row="0" Name="ingredientInputTextBox" Text="{Binding IngredientInput}" Margin="10,10"/>
+                        <StackPanel Grid.Column="0" Grid.Row="1">
+                            <Button Content="Add" Command="{Binding AddIngredientCommand}" Margin="20,10,20,5"/>
+                            <Button Content="Change" Command="{Binding UpdateIngredientCommand}" Margin="20,5"/>
+                            <Button Content="Delete" Command="{Binding DeleteIngredientCommand}" Margin="20,5"/>
+                        </StackPanel>
+                        <ListBox Grid.Column="1" Grid.Row="1" MinHeight="100" ItemsSource="{Binding IngredientsListInput}" SelectedItem="{Binding SelectedIngredient, Mode=TwoWay}" Margin="10"/>
+                        <Button Grid.Column="0" Grid.Row="2" Content="Add as food item" Command="{Binding AddAsFoodItemCommand}" Width="100" Margin="10" HorizontalAlignment="Center"/>
+                        <Button Grid.Column="1" Grid.Row="2" Content="Cancel" Command="{Binding CancelDialogCommand}" Width="50" Margin="10" HorizontalAlignment="Center"/>
+                    </Grid>
+
+                </GroupBox>
+            </StackPanel>
+        </Grid>
+    </DockPanel>
+</Window>

@@ -6,6 +6,12 @@
     /// </summary>
     public class AnimalAgeComparer : IComparer<AnimalListItemViewModel>
     {
+        private readonly bool _descending;
+
+        public AnimalAgeComparer(bool descending = true)
+        {
+            _descending = descending;
+        }
         public int Compare(AnimalListItemViewModel? x, AnimalListItemViewModel? y)
         {
             int idCompare = string.Compare(x.Id, y.Id);
@@ -15,6 +21,11 @@
             if (y?.Age == null) return -1;
 
             int ageCompare = x.Age.Value.CompareTo(y.Age.Value);
+
+            if (_descending)
+            {
+                ageCompare *= -1;
+            }
 
             if (ageCompare == 0)
             {

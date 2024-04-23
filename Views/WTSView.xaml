@@ -9,7 +9,7 @@
         d:DataContext="{d:DesignInstance {x:Type vm:WTSViewModel}}"
         DataContext="{Binding WTSViewModel, Source={StaticResource ViewModelLocator}}"
         mc:Ignorable="d"
-        Title="WildlifeTracker" Height="746" Width="900">
+        Title="WildlifeTracker" Height="750" Width="1300">
 
 
     <!--IValueConverter to toggle the visibility of input controllers with a boolean flag-->
@@ -20,19 +20,32 @@
         <conv:FirstValidationErrorConverter x:Key="FirstValidationErrorConverter"/>
         <conv:StringToIntConverter x:Key="StringToIntConverter"/>
         <conv:StringToDoubleConverter x:Key="StringToDoubleConverter"/>
+        <conv:IngredientsListConverter x:Key="IngredientsListConverter"/>
     </Window.Resources>
 
+
+
+
     <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Open"/>
+                <MenuItem Header="_Save as ..."/>
+                <MenuItem Header="_Exit"/>
+            </MenuItem>
+        </Menu>
+        <StackPanel></StackPanel>
         <Grid DockPanel.Dock="Top" Margin="20">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="427*"/>
-                <ColumnDefinition Width="283*"/>
+                <ColumnDefinition Width="520"/>
+                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="400"/>
             </Grid.ColumnDefinitions>
 
             <!-- Data input -->
             <StackPanel Grid.Column="0" Margin="5,5,5,5">
                 <TextBlock Text="Animal Specifications" FontWeight="Bold"/>
-                
+
                 <!--Name input-->
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Name" Target="{Binding ElementName=nameTextBox}" VerticalAlignment="Center" Width="80"/>
@@ -48,7 +61,7 @@
                         </Border>
                     </Popup>
                 </StackPanel>
-                
+
                 <!--Age input-->
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Age" Target="{Binding ElementName=ageTextBox}" VerticalAlignment="Center" Width="80"/>
@@ -82,25 +95,25 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Grid.Column="0" Grid.Row="0">
-                        
+
                         <!--Amphibian specific input-->
                         <StackPanel>
                             <CheckBox Content="Landliving" IsChecked="{Binding Landliving}" Margin="5, 5, 5, 5"
                                   Visibility="{Binding LandlivingVisible, Converter={StaticResource BoolToVisibility}}" />
                         </StackPanel>
-                        
+
                         <!--Arachnid specific input-->
                         <StackPanel>
                             <CheckBox Content="Venomous" IsChecked="{Binding Venomous}" Margin="5, 5, 5, 5"
                                   Visibility="{Binding VenomousVisible, Converter={StaticResource BoolToVisibility}}" />
                         </StackPanel>
-                        
+
                         <!--Bird specific input-->
                         <StackPanel>
                             <CheckBox Content="Migratory" IsChecked="{Binding Migratory}" Margin="5, 5, 5, 5"
                                   Visibility="{Binding MigratoryVisible, Converter={StaticResource BoolToVisibility}}" />
                         </StackPanel>
-                        
+
                         <!--Fish specific input-->
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Water type" Target="{Binding ElementName=waterTypeCombo}" VerticalAlignment="Center" Width="80"
@@ -108,13 +121,13 @@
                             <ComboBox Name="waterTypeCombo" Width="120" SelectedItem="{Binding SelectedWaterType}" ItemsSource="{Binding WaterTypes}" DisplayMemberPath="."
                                       Visibility="{Binding WaterTypeVisible, Converter={StaticResource BoolToVisibility}}"/>
                         </StackPanel>
-                        
+
                         <!--Insect specific input-->
                         <StackPanel>
                             <CheckBox Content="Can fly" IsChecked="{Binding CanFly}" Margin="5, 5, 5, 5"
                                   Visibility="{Binding CanFlyVisible, Converter={StaticResource BoolToVisibility}}" />
                         </StackPanel>
-                        
+
                         <!--Mammal specific input-->
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Number of legs" Target="{Binding ElementName=numberOfLegsTextBox}" Width="120"
@@ -347,13 +360,17 @@
                     <StackPanel Grid.Column="2" Grid.Row="0">
                         <TextBlock Grid.Column="2" Grid.Row="0" Text="Species"/>
                         <ListBox Name="speciesListBox" Grid.Column="0" Grid.Row="0" Height="100" ItemsSource="{Binding AvailableSpecies}" SelectedItem="{Binding SelectedSpecies}"/>
+                        <CheckBox Content="List all species" Command="{Binding ListAllSpeciesCommand}" IsChecked="{Binding IsListAllSpeciesChecked, Mode=TwoWay}"/>
                     </StackPanel>
 
                 </Grid>
 
-                <Grid Margin="0,10,0,0" Height="30">
-                    <CheckBox Content="List all species" Command="{Binding ListAllSpeciesCommand}" IsChecked="{Binding IsListAllSpeciesChecked, Mode=TwoWay}"/>
-                    <Button Content="Add animal" Width="150" Command="{Binding CreateAnimalCommand}"/>
+                <Grid Height="30">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Add animal" Width="150" Margin="10,0" Command="{Binding CreateAnimalCommand}"/>
+                        <Button Content="Change animal" Width="150" Margin="10,0" Command="{Binding UpdateAnimalCommand}"/>
+                        <Button Content="Delete animal" Width="150" Margin="10,0" Command="{Binding DeleteAnimalCommand}"/>
+                    </StackPanel>
                 </Grid>
 
                 <Grid Margin="0,10,0,0" Height="Auto">
@@ -368,10 +385,10 @@
 
                     <TextBlock Grid.Row="0" Text="List of added animals" Margin="50,0" FontWeight="Bold"/>
 
-                    <ListView Name="AnimalsListView" Grid.Row="1" Margin="10,10" ItemsSource="{Binding Animals}" SelectedItem="{Binding SelectedAnimal, Mode=TwoWay}">
+                    <ListView Name="AnimalsListView" Grid.Row="1" Margin="10" ItemsSource="{Binding Animals}" SelectedItem="{Binding SelectedAnimal, Mode=TwoWay}">
                         <ListView.View>
                             <GridView>
-                                
+
                                 <GridViewColumn Width="45"  Header="ID" DisplayMemberBinding="{Binding Id}" >
                                     <GridViewColumn.HeaderContainerStyle>
                                         <Style TargetType="{x:Type GridViewColumnHeader}">
@@ -381,7 +398,7 @@
                                         </Style>
                                     </GridViewColumn.HeaderContainerStyle>
                                 </GridViewColumn>
-                                
+
                                 <GridViewColumn Width="150" Header="Name" DisplayMemberBinding="{Binding Name}" >
                                     <GridViewColumn.HeaderContainerStyle>
                                         <Style TargetType="{x:Type GridViewColumnHeader}">
@@ -391,7 +408,7 @@
                                         </Style>
                                     </GridViewColumn.HeaderContainerStyle>
                                 </GridViewColumn>
-                                
+
                                 <GridViewColumn Width="40" Header="Age" DisplayMemberBinding="{Binding Age}" >
                                     <GridViewColumn.HeaderContainerStyle>
                                         <Style TargetType="{x:Type GridViewColumnHeader}">
@@ -401,7 +418,7 @@
                                         </Style>
                                     </GridViewColumn.HeaderContainerStyle>
                                 </GridViewColumn>
-                                
+
                                 <GridViewColumn Width="80" Header="Category" DisplayMemberBinding="{Binding Category}" >
                                     <GridViewColumn.HeaderContainerStyle>
                                         <Style TargetType="{x:Type GridViewColumnHeader}">
@@ -431,7 +448,7 @@
                                         </Style>
                                     </GridViewColumn.HeaderContainerStyle>
                                 </GridViewColumn>
-                                
+
                             </GridView>
                         </ListView.View>
                     </ListView>
@@ -461,12 +478,26 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </Border>
-                
+
                 <Label Content="{Binding EaterTypeInfo}" FontWeight="Bold" Margin="10,20,0,0" HorizontalAlignment="Center"/>
                 <Border Width="280" Height="100" BorderBrush="Gray" BorderThickness="1" Margin="0,10,0,0">
                     <TextBlock Text="{Binding FoodScheduleInfo}" />
                 </Border>
-                
+
+            </StackPanel>
+
+            <StackPanel Grid.Column="2">
+                <ListView Name="foodItemsListView" Margin="10" Height="200" ItemsSource="{Binding FoodItems}" SelectedItem="{Binding SelectedFoodItem, Mode=TwoWay}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Width="100"  Header="Name" DisplayMemberBinding="{Binding Name}" />
+                            <GridViewColumn Width="300" Header="Ingredients" DisplayMemberBinding="{Binding Ingredients, Converter={StaticResource IngredientsListConverter}}" />
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+                <Button Content="Add food items" Command="{Binding OpenFoodItemViewCommand}" Width="100" Height="30" Margin="10" HorizontalAlignment="Center" />
+                <Label Content="Associate selected animal with selected food" Margin="0,10,0,0"  HorizontalAlignment="Center"/>
+                <Button Content="Associate " Command="{Binding PairAnimalWithFoodItemCommand}" Width="100" Height="30" Margin="10" HorizontalAlignment="Center" />
             </StackPanel>
         </Grid>
     </DockPanel>

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using WTS.Services;
 using WTS.Services.Interfaces;
@@ -32,11 +33,15 @@ namespace WTS
 
         private void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<IMessenger, StrongReferenceMessenger>();
+
             services.AddTransient<IFileService, FileService>();
             services.AddTransient<IAnimalManager, AnimalManager>();
+            services.AddSingleton<IFoodManager, FoodManager>();
             services.AddTransient<GeneralAnimalValidator>();
 
             services.AddTransient<WTSViewModel>();
+            services.AddTransient<FoodItemViewModel>();
         }
     }
 }

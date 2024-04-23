@@ -32,12 +32,22 @@ namespace WTS.Models.AnimalBase
         /// </summary>
         public int? Age { get; set; }
 
+        /// <summary>
+        /// Gender of the animal
+        /// </summary>
         public GenderType Gender { get; set; }
 
         /// <summary>
         /// Set automatically at the category level of inheritance
         /// </summary>
         public CategoryType Category { get; set; }
+
+        /// <summary>
+        /// Gets a display name for the animal. If the Name property is not null or whitespace,
+        /// it returns the Name. Otherwise, it returns the Id as a fallback.
+        /// </summary>
+        public string DisplayName => !string.IsNullOrWhiteSpace(Name) ? Name : Id;
+
 
         /// <summary>
         /// Retrieves a collection of properties for the current object represented as key-value pairs.

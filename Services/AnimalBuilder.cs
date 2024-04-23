@@ -1,7 +1,4 @@
-﻿using System.Windows.Controls;
-using System.Xml.Linq;
-using WTS.Configurations;
-using WTS.Models;
+﻿using WTS.Configurations;
 using WTS.Models.Amphibians;
 using WTS.Models.AnimalBase;
 using WTS.Models.Arachnids;
