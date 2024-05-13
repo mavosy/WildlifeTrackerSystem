@@ -68,5 +68,10 @@ namespace WTS.Services
                 .Where(pair => pair.Value.Contains(animalName))
                 .Select(pair => pair.Key);
         }
+
+        public IEnumerable<KeyValuePair<string, List<string>>> GetFoodToAnimalsMap()
+        {
+            return _foodToAnimalsMap.Select(entry => new KeyValuePair<string, List<string>>(entry.Key, new List<string>(entry.Value)));
+        }
     }
 }

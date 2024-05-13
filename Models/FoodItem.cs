@@ -2,6 +2,7 @@
 
 namespace WTS.Models
 {
+    [Serializable]
     public class FoodItem
     {
         public string Name { get; set; }
@@ -14,20 +15,9 @@ namespace WTS.Models
 
         public override string ToString()
         {
-            if (Ingredients is not null && Ingredients.Count > 0)
-            {
-                string ingredientsString = null;
-                Ingredients.ToStringList();
-                foreach (string item in Ingredients.ToStringList())
-                {
-                    ingredientsString += item;
-                }
-                return ingredientsString;
-            }
-            else
-            {
-                return "List is empty";
-            }
+            return Ingredients.Count > 0
+                ? string.Join(", ", Ingredients.ToStringList())
+                : "List is empty";
         }
     }
 }

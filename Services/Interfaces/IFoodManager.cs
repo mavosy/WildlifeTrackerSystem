@@ -34,5 +34,7 @@ namespace WTS.Services.Interfaces
         /// <param name="animalName">The name or ID (DisplayName property) of the animal for which to retrieve associated food items.</param>
         /// <returns>An enumerable collection of food items associated with the specified animal. If no associations exist, an empty list is returned.</returns>
         IEnumerable<string> GetFoodItemsForAnimal(string animalName);
+
+        IEnumerable<KeyValuePair<string, List<string>>> GetFoodToAnimalsMap();
     }
 }
