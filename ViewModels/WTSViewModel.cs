@@ -5,10 +5,14 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using System.Xml.Serialization;
 using WTS.Commands;
 using WTS.Enums;
 using WTS.Messages;
@@ -21,7 +25,6 @@ using WTS.Models.Fish;
 using WTS.Models.Insects;
 using WTS.Models.Mammals;
 using WTS.Models.Reptiles;
-using WTS.Services;
 using WTS.Services.Interfaces;
 using WTS.Utilities;
 using WTS.Validators;
@@ -36,6 +39,10 @@ namespace WTS.ViewModels
     {
         // Constants
         private const string ImageFilters = "Image files (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png";
+        private const string SaveDataFilters = "Text File (*.txt)|*.txt|JSON File (*.json)|*.json|XML File (*.xml)|*.xml";
+        private const string LoadDataFilters = "All Files (*.txt;*.json;*.xml)|*.txt;*.json;*.xml|Text Files (*.txt)|*.txt|JSON Files (*.json)|*.json|XML Files (*.xml)|*.xml";
+
+
 
         private const string Frog = "Frog";
         private const string Axolotl = "Axolotl";
@@ -55,6 +62,7 @@ namespace WTS.ViewModels
         // Dependency Injection fields
         private readonly IMessenger _messenger;
         private readonly IFileService _fileService;
+        private readonly IDialogService _dialogService;
         private readonly IAnimalManager _animalManager;
         private readonly IFoodManager _foodManager;
         private readonly GeneralAnimalValidator _generalAnimalValidator;
@@ -88,10 +96,11 @@ namespace WTS.ViewModels
         /// <summary>
         /// Constructor of WTSViewModel, initializes a new instance of the WTSViewModel class.
         /// </summary>
-        public WTSViewModel(IMessenger messenger, IFileService fileService, IAnimalManager animalManager, IFoodManager foodManager, GeneralAnimalValidator generalAnimalValidator)
+        public WTSViewModel(IMessenger messenger, IFileService fileService, IDialogService dialogService, IAnimalManager animalManager, IFoodManager foodManager, GeneralAnimalValidator generalAnimalValidator)
         {
             _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
             _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
+            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             _animalManager = animalManager ?? throw new ArgumentNullException(nameof(animalManager));
             _foodManager = foodManager ?? throw new ArgumentNullException(nameof(foodManager));
             _generalAnimalValidator = generalAnimalValidator ?? throw new ArgumentNullException(nameof(generalAnimalValidator));
@@ -303,6 +312,10 @@ namespace WTS.ViewModels
 
         public ICommand PairAnimalWithFoodItemCommand { get; private set; }
 
+        public ICommand SaveAnimalDataCommand { get; private set; }
+
+        public ICommand LoadAnimalDataCommand { get; private set; }
+
         //Booleans for UI visibility collapse
         public bool LandlivingVisible { get; set; }
         public bool ColorVisible { get; set; }
@@ -475,7 +488,7 @@ namespace WTS.ViewModels
             SelectedAnimal = currentlySelectedAnimal;
         }
 
-        private void OpenFoodItemView()
+        private static void OpenFoodItemView()
         {
             var foodItemView = new FoodItemView();
             foodItemView.ShowDialog();
@@ -589,7 +602,7 @@ namespace WTS.ViewModels
         {
             try
             {
-                string? filePath = _fileService.OpenFileDialog(ImageFilters);
+                string filePath = _dialogService.OpenFileDialog(ImageFilters) ?? throw new Exception("No image selected");
                 AnimalImage = _fileService.FileToBitmapImage(filePath);
             }
             catch (Exception ex)
@@ -658,6 +671,8 @@ namespace WTS.ViewModels
             SortCommand = new RelayCommand(SortAnimals);
             OpenFoodItemViewCommand = new RelayCommand(_ => OpenFoodItemView());
             PairAnimalWithFoodItemCommand = new RelayCommand(PairAnimalWithFoodItem);
+            SaveAnimalDataCommand = new RelayCommand(_ => SaveAnimalDataFromFile());
+            LoadAnimalDataCommand = new RelayCommand(_ => LoadAnimalDataFromFile());
         }
 
         /// <summary>
@@ -715,6 +730,141 @@ namespace WTS.ViewModels
         {
             _animalManager.SortAnimalList(parameter);
             LoadAnimals();
+        }
+
+        private void SaveAnimalDataFromFile()
+        {
+            try
+            {
+                var filePath = _dialogService.SaveFileDialog(SaveDataFilters);
+                if (!string.IsNullOrEmpty(filePath))
+                {
+                    if (Path.GetExtension(filePath).Equals(".txt", StringComparison.CurrentCultureIgnoreCase))
+                    {
+
+                        string animalDataString = FormatAnimalListForSaving();
+                        _fileService.SaveDataToTextFile(filePath, animalDataString);
+
+                    }
+                    else if (Path.GetExtension(filePath).Equals(".json", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        List<Dictionary<string, string>> animalDataDictionary = _animalManager.CopyList().ConvertAll(animalVM => animalVM.GetPropertiesAsKeyValuePairs()
+                                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString()));
+                        var jsonString = _fileService.SerializeListToJson(animalDataDictionary);
+                        _fileService.SaveDataToTextFile(filePath, jsonString);
+                    }
+                    else if (Path.GetExtension(filePath).Equals(".xml", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        SaveFoodToAnimalsMapToXml(filePath);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Unable to save data. Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public void SaveFoodToAnimalsMapToXml(string filePath)
+        {
+            var xmlSerializer = new XmlSerializer(typeof(List<KeyValuePair<string, List<string>>>));
+            using var fileStream = new FileStream(filePath, FileMode.Create);
+            xmlSerializer.Serialize(fileStream, _foodManager.GetFoodToAnimalsMap());
+        }
+
+        /// <summary>
+        /// Formats the list of animals in preparation for saving.
+        /// </summary>
+        public string FormatAnimalListForSaving()
+        {
+            StringBuilder builder = new StringBuilder();
+            foreach (var animalViewModel in _animalManager.CopyList())
+            {
+                foreach (var kvp in animalViewModel.GetPropertiesAsKeyValuePairs())
+                {
+                    builder.AppendLine($"{kvp.Key}: {kvp.Value}");
+                }
+                builder.AppendLine();
+            }
+            return builder.ToString();
+        }
+
+        private void LoadAnimalDataFromFile()
+        {
+            try
+            {
+                string? filePath = _dialogService.OpenFileDialog(LoadDataFilters);
+                if (!string.IsNullOrEmpty(filePath))
+                {
+                    string? dataString = null;
+                    if (Path.GetExtension(filePath).Equals(".txt", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        dataString = _fileService.LoadDataFromTextFile(filePath);
+                    }
+                    else if (Path.GetExtension(filePath).Equals(".json", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        string jsonData = File.ReadAllText(filePath);
+                        List<Dictionary<string, string>>? animalDataList = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(jsonData);
+                        dataString = FormatDictionaryListForDisplay(animalDataList) ?? throw new NullReferenceException("Error loading data");
+                    }
+                    else if (Path.GetExtension(filePath).Equals(".xml", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        var xmlSerializer = new XmlSerializer(typeof(List<KeyValuePair<string, List<string>>>));
+                        using var fileStream = new FileStream(filePath, FileMode.Open);
+                        List<KeyValuePair<string, List<string>>>? xmlFoodData = (List<KeyValuePair<string, List<string>>>?)xmlSerializer.Deserialize(fileStream);
+                        dataString = FormatXmlDataForDisplay(xmlFoodData);
+                    }
+
+                    ShowDataInPopup(dataString);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Unable to load data. Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private static string FormatDictionaryListForDisplay(List<Dictionary<string, string>>? dataList)
+        {
+            ArgumentNullException.ThrowIfNull(dataList);
+
+            var builder = new StringBuilder();
+            foreach (var dict in dataList)
+            {
+                foreach (var kvp in dict)
+                {
+                    builder.AppendLine($"{kvp.Key}: {kvp.Value}");
+                }
+                builder.AppendLine();
+            }
+            return builder.ToString();
+        }
+
+        private static string? FormatXmlDataForDisplay(List<KeyValuePair<string, List<string>>>? xmlFoodData)
+        {
+            if (xmlFoodData is not null)
+            {
+                // Convert the list to a displayable string format
+                StringBuilder builder = new StringBuilder();
+                foreach (var item in xmlFoodData)
+                {
+                    builder.AppendLine($"{item.Key}:");
+                    foreach (var subItem in item.Value)
+                    {
+                        builder.AppendLine($"  - {subItem}");
+                    }
+                    builder.AppendLine(); // Add a newline for better readability between items
+                }
+
+                return builder.ToString();
+            }
+            else return null;
+        }
+
+        private void ShowDataInPopup(string? data)
+        {
+            if (string.IsNullOrEmpty(data)) return;
+            _dialogService.DataDisplayDialog("Animal Data", data);
         }
 
         /// <summary>
@@ -874,7 +1024,7 @@ namespace WTS.ViewModels
         /// Initializes an empty dictionary to store validation errors for properties.
         /// </summary>
         /// <returns>An empty dictionary for storing property validation errors.</returns>
-        private Dictionary<string, List<string>?> InitializeValidationErrorMap()
+        private static Dictionary<string, List<string>?> InitializeValidationErrorMap()
         {
             return new Dictionary<string, List<string>?>();
         }

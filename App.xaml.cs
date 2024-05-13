@@ -36,6 +36,7 @@ namespace WTS
             services.AddSingleton<IMessenger, StrongReferenceMessenger>();
 
             services.AddTransient<IFileService, FileService>();
+            services.AddTransient<IDialogService, DialogService>();
             services.AddTransient<IAnimalManager, AnimalManager>();
             services.AddSingleton<IFoodManager, FoodManager>();
             services.AddTransient<GeneralAnimalValidator>();

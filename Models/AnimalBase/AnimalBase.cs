@@ -48,7 +48,6 @@ namespace WTS.Models.AnimalBase
         /// </summary>
         public string DisplayName => !string.IsNullOrWhiteSpace(Name) ? Name : Id;
 
-
         /// <summary>
         /// Retrieves a collection of properties for the current object represented as key-value pairs.
         /// This method is overridden in the child classes of AnimalBase, and implemented to include additional properties specific to the derived class.

@@ -110,6 +110,12 @@ namespace WTS.Services
         public List<string> ToStringList() => _items.Select(item => item.ToString()).ToList();
 
         /// <summary>
+        /// Returns a copy of the collection.
+        /// </summary>
+        /// <returns>A list of the collection.</returns>
+        public List<T> CopyList() => _items.ToList();
+
+        /// <summary>
         /// Checks if the given index is within the range of the collection.
         /// </summary>
         /// <param name="index">The index to check.</param>

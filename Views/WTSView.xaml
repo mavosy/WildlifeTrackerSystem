@@ -29,12 +29,12 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_Open"/>
-                <MenuItem Header="_Save as ..."/>
+                <MenuItem Header="_Open" Command="{Binding LoadAnimalDataCommand}"/>
+                <MenuItem Header="_Save as ..." Command="{Binding SaveAnimalDataCommand}"/>
                 <MenuItem Header="_Exit"/>
             </MenuItem>
         </Menu>
-        <StackPanel></StackPanel>
+        
         <Grid DockPanel.Dock="Top" Margin="20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="520"/>

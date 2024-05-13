@@ -81,5 +81,11 @@
         /// <param name="index">The index to check.</param>
         /// <returns>True if the index is out of range, otherwise false.</returns>
         bool IsIndexInRange(int index);
+
+        /// <summary>
+        /// Returns a copy of the collection.
+        /// </summary>
+        /// <returns>A list of the collection.</returns>
+        List<T> CopyList();
     }
 }
