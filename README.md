@@ -62,7 +62,7 @@
 
 <!-- [![Product Name Screen Shot][product-screenshot]](https://example.com) -->
 
-**WildlifeTrackerSystem** is a **WPF** application designed for tracking wildlife data as a fun, experimental school project to practice various C# techniques. This project demonstrates some skills in software design using the **MVVM** pattern, and showcases techniques like **dependency injection**, **event handling**, **command** patterns, and data validation. The application architecture is **bloated** intentionally, allowing the exploration of multiple software development concepts in a non-serious, sandbox environment.
+**WildlifeTrackerSystem** is a **WPF** application designed for tracking wildlife data as a fun, experimental school project, to practice various C# techniques. This project is designed using the **MVVM** pattern, and practises techniques like **dependency injection**, **event handling**, **command** patterns, and **data validation**. The application architecture is **bloated** intentionally, allowing the exploration of multiple software development concepts and patterns in a non-serious, sandbox environment.
 
 The goal of this project is not to create a production-grade application but to experiment with features like custom data services, file management, and model validation in the context of wildlife tracking. This project includes many services and layers to mimic a complex architecture, which allows exploring how these techniques can interact and function.
 
