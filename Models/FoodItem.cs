@@ -1,4 +1,5 @@
 ﻿using WTS.Services;
+using WTS.Services.Interfaces;
 
 namespace WTS.Models
 {

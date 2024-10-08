@@ -7,12 +7,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.Json;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
-using System.Xml.Serialization;
 using WTS.Commands;
 using WTS.Enums;
 using WTS.Messages;
@@ -741,52 +738,43 @@ namespace WTS.ViewModels
                 {
                     if (Path.GetExtension(filePath).Equals(".txt", StringComparison.CurrentCultureIgnoreCase))
                     {
-
-                        string animalDataString = FormatAnimalListForSaving();
-                        _fileService.SaveDataToTextFile(filePath, animalDataString);
-
+                        _animalManager.SaveAsText(filePath);
                     }
                     else if (Path.GetExtension(filePath).Equals(".json", StringComparison.CurrentCultureIgnoreCase))
                     {
-                        List<Dictionary<string, string>> animalDataDictionary = _animalManager.CopyList().ConvertAll(animalVM => animalVM.GetPropertiesAsKeyValuePairs()
-                                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString()));
-                        var jsonString = _fileService.SerializeListToJson(animalDataDictionary);
-                        _fileService.SaveDataToTextFile(filePath, jsonString);
+                        _animalManager.SaveAsJson(filePath);
                     }
                     else if (Path.GetExtension(filePath).Equals(".xml", StringComparison.CurrentCultureIgnoreCase))
                     {
-                        SaveFoodToAnimalsMapToXml(filePath);
+                        SaveAnimalFoodItemsToXml(filePath);
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Unable to save data. Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Unable to save data. Error: {ex.Message} {ex.InnerException}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        public void SaveFoodToAnimalsMapToXml(string filePath)
+        public void SaveAnimalFoodItemsToXml(string fileName)
         {
-            var xmlSerializer = new XmlSerializer(typeof(List<KeyValuePair<string, List<string>>>));
-            using var fileStream = new FileStream(filePath, FileMode.Create);
-            xmlSerializer.Serialize(fileStream, _foodManager.GetFoodToAnimalsMap());
-        }
-
-        /// <summary>
-        /// Formats the list of animals in preparation for saving.
-        /// </summary>
-        public string FormatAnimalListForSaving()
-        {
-            StringBuilder builder = new StringBuilder();
-            foreach (var animalViewModel in _animalManager.CopyList())
+            var animalNames = new List<string>();
+            for (int i = 0; i < _animalManager.Count; i++)
             {
-                foreach (var kvp in animalViewModel.GetPropertiesAsKeyValuePairs())
+                var animal = _animalManager.GetItemAt(i);
+                if (!string.IsNullOrEmpty(animal.Name))
                 {
-                    builder.AppendLine($"{kvp.Key}: {kvp.Value}");
+                    animalNames.Add(animal.Name);
                 }
-                builder.AppendLine();
             }
-            return builder.ToString();
+            if (animalNames.Count != 0)
+            {
+                _foodManager.SaveAsXml(fileName, animalNames);
+            }
+            else
+            {
+                throw new Exception("No animals to save");
+            }
         }
 
         private void LoadAnimalDataFromFile()
@@ -799,20 +787,15 @@ namespace WTS.ViewModels
                     string? dataString = null;
                     if (Path.GetExtension(filePath).Equals(".txt", StringComparison.CurrentCultureIgnoreCase))
                     {
-                        dataString = _fileService.LoadDataFromTextFile(filePath);
+                        dataString = _animalManager.LoadText(filePath) ?? throw new NullReferenceException("Error loading data");
                     }
                     else if (Path.GetExtension(filePath).Equals(".json", StringComparison.CurrentCultureIgnoreCase))
                     {
-                        string jsonData = File.ReadAllText(filePath);
-                        List<Dictionary<string, string>>? animalDataList = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(jsonData);
-                        dataString = FormatDictionaryListForDisplay(animalDataList) ?? throw new NullReferenceException("Error loading data");
+                        dataString = _animalManager.LoadJson(filePath) ?? throw new NullReferenceException("Error loading data");
                     }
                     else if (Path.GetExtension(filePath).Equals(".xml", StringComparison.CurrentCultureIgnoreCase))
                     {
-                        var xmlSerializer = new XmlSerializer(typeof(List<KeyValuePair<string, List<string>>>));
-                        using var fileStream = new FileStream(filePath, FileMode.Open);
-                        List<KeyValuePair<string, List<string>>>? xmlFoodData = (List<KeyValuePair<string, List<string>>>?)xmlSerializer.Deserialize(fileStream);
-                        dataString = FormatXmlDataForDisplay(xmlFoodData);
+                        dataString = _foodManager.LoadFromXml(filePath) ?? throw new NullReferenceException("Error loading data");
                     }
 
                     ShowDataInPopup(dataString);
@@ -820,45 +803,8 @@ namespace WTS.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Unable to load data. Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Unable to load data. Error", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
-
-        private static string FormatDictionaryListForDisplay(List<Dictionary<string, string>>? dataList)
-        {
-            ArgumentNullException.ThrowIfNull(dataList);
-
-            var builder = new StringBuilder();
-            foreach (var dict in dataList)
-            {
-                foreach (var kvp in dict)
-                {
-                    builder.AppendLine($"{kvp.Key}: {kvp.Value}");
-                }
-                builder.AppendLine();
-            }
-            return builder.ToString();
-        }
-
-        private static string? FormatXmlDataForDisplay(List<KeyValuePair<string, List<string>>>? xmlFoodData)
-        {
-            if (xmlFoodData is not null)
-            {
-                // Convert the list to a displayable string format
-                StringBuilder builder = new StringBuilder();
-                foreach (var item in xmlFoodData)
-                {
-                    builder.AppendLine($"{item.Key}:");
-                    foreach (var subItem in item.Value)
-                    {
-                        builder.AppendLine($"  - {subItem}");
-                    }
-                    builder.AppendLine(); // Add a newline for better readability between items
-                }
-
-                return builder.ToString();
-            }
-            else return null;
         }
 
         private void ShowDataInPopup(string? data)

@@ -36,5 +36,12 @@ namespace WTS.ViewModels
                 yield return kvp;
             }
         }
+
+        public override string ToString()
+        {
+            var properties = GetPropertiesAsKeyValuePairs()
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString());
+            return string.Join("\n", properties.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
+        }
     }
 }

@@ -61,7 +61,7 @@
         /// <summary>
         /// Reverses the sort order of the list.
         /// </summary>
-        public void ReverseItems();
+        void ReverseItems();
 
         /// <summary>
         /// Returns an array of strings where each string represents an item in the collection.
@@ -83,9 +83,26 @@
         bool IsIndexInRange(int index);
 
         /// <summary>
-        /// Returns a copy of the collection.
+        /// Saves the list to a text file.
         /// </summary>
-        /// <returns>A list of the collection.</returns>
-        List<T> CopyList();
+        /// <param name="fileName"></param>
+        void SaveAsText(string fileName);
+
+        /// <summary>
+        /// Saves the list from a JSON file.
+        /// </summary>
+        /// <param name="fileName"></param>
+        void SaveAsJson(string fileName);
+
+        /// <summary>
+        /// Loads the list from a text file.
+        /// </summary>
+        string LoadText(string fileName);
+
+        /// <summary>
+        /// Loads the list from a JSON file.
+        /// </summary>
+        /// <param name="fileName"></param>
+        string LoadJson(string fileName);
     }
 }
