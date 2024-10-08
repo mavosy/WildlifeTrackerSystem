@@ -1,8 +1,8 @@
 ﻿using System.IO;
 using System.Text.Json;
 using System.Windows.Media.Imaging;
+using System.Xml.Serialization;
 using WTS.Services.Interfaces;
-using WTS.ViewModels;
 
 namespace WTS.Services
 {
@@ -86,6 +86,34 @@ namespace WTS.Services
         public List<T> DeserializeListFromJson<T>(string jsonString)
         {
             return JsonSerializer.Deserialize<List<T>>(jsonString) ?? throw new NullReferenceException();
+        }
+
+        public void SaveDataToXmlFile<T>(string filePath, T data)
+        {
+            try
+            {
+                var xmlSerializer = new XmlSerializer(typeof(T));
+                using var fileStream = new FileStream(filePath, FileMode.Create);
+                xmlSerializer.Serialize(fileStream, data);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Data could not be saved", ex);
+            }
+        }
+
+        public T LoadDataFromXmlFile<T>(string filePath)
+        {
+            try
+            {
+                var xmlSerializer = new XmlSerializer(typeof(T));
+                using var fileStream = new FileStream(filePath, FileMode.Open);
+                return (T)xmlSerializer.Deserialize(fileStream);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Data could not be loaded", ex);
+            }
         }
     }
 }

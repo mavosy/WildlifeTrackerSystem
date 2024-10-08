@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AnimalFoodData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <AnimalFoodEntry AnimalName="Bob">
+    <FoodItem>Bugs</FoodItem>
+    <FoodItem>Seeds</FoodItem>
+  </AnimalFoodEntry>
+  <AnimalFoodEntry AnimalName="Steve">
+    <FoodItem>Fish</FoodItem>
+    <FoodItem>Octupus</FoodItem>
+  </AnimalFoodEntry>
+  <AnimalFoodEntry AnimalName="Daniela">
+    <FoodItem>Fish</FoodItem>
+    <FoodItem>Mice</FoodItem>
+  </AnimalFoodEntry>
+  <AnimalFoodEntry AnimalName="Fiona">
+    <FoodItem>Bugs</FoodItem>
+  </AnimalFoodEntry>
+  <AnimalFoodEntry AnimalName="Carl">
+    <FoodItem>Fish</FoodItem>
+    <FoodItem>Mice</FoodItem>
+  </AnimalFoodEntry>
+</AnimalFoodData>

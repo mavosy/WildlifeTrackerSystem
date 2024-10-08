@@ -1,0 +1,44 @@
+Species: Raven
+ID: B001
+Name: Bob
+Age: 12
+Gender: Male
+Category: Bird
+Migratory: True
+HasHatchling: True
+
+Species: Shark
+ID: F001
+Name: Steve
+Age: 3
+Gender: Male
+Category: Fish
+Habitat: Brackish
+NumberOfGills: 3
+
+Species: Cat
+ID: M001
+Name: Daniela
+Age: 17
+Gender: Female
+Category: Mammal
+NumberOfLegs: 4
+Breed: Stray
+
+Species: Spider
+ID: AR001
+Name: Fiona
+Age: 1
+Gender: Female
+Category: Arachnid
+Venomous: True
+WebWeaving: True
+
+Species: Cat
+ID: M002
+Name: Carl
+Age: 14
+Gender: Male
+Category: Mammal
+NumberOfLegs: 3
+Breed: Stray

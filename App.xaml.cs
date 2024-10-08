@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using WTS.Services;
 using WTS.Services.Interfaces;
+using WTS.Utilities;
 using WTS.Validators;
 using WTS.ViewModels;
 using WTS.Views;
@@ -21,6 +22,8 @@ namespace WTS
             var serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);
             ServiceProvider = serviceCollection.BuildServiceProvider();
+
+            ServiceLocator.SetLocatorProvider(ServiceProvider);
 
             var viewModelLocator = new ViewModelLocator(ServiceProvider);
             Resources.Add("ViewModelLocator", viewModelLocator);

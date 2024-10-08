@@ -41,5 +41,15 @@ namespace WTS.Services.Interfaces
         /// </summary>
         /// <returns>A deserialized generic list</returns>
         List<T> DeserializeListFromJson<T>(string jsonString);
+
+        /// <summary>
+        /// Serializes the given data to xml using xmlSerializer
+        /// </summary>
+        void SaveDataToXmlFile<T>(string filePath, T data);
+
+        /// <summary>
+        /// Deserializes the given data to xml using xmlSerializer
+        /// </summary>
+        public T LoadDataFromXmlFile<T>(string filePath);
     }
 }

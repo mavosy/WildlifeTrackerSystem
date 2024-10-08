@@ -36,5 +36,9 @@ namespace WTS.Services.Interfaces
         IEnumerable<string> GetFoodItemsForAnimal(string animalName);
 
         IEnumerable<KeyValuePair<string, List<string>>> GetFoodToAnimalsMap();
+
+        public string LoadFromXml(string fileName);
+
+        void SaveAsXml(string fileName, List<string> animalNames);
     }
 }

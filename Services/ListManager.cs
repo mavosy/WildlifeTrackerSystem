@@ -1,4 +1,9 @@
-﻿using WTS.Services.Interfaces;
+﻿using System.IO;
+using System.Text;
+using System.Text.Json;
+using System.Xml.Serialization;
+using WTS.Services.Interfaces;
+using WTS.Utilities;
 
 namespace WTS.Services
 {
@@ -8,7 +13,14 @@ namespace WTS.Services
     /// <typeparam name="T">The type of items in the collection.</typeparam>
     public class ListManager<T> : IListManager<T>
     {
-        private List<T> _items = new List<T>();
+        private readonly IFileService _fileService;
+
+        public ListManager()
+        {
+            _fileService = ServiceLocator.GetService<IFileService>() ?? throw new ArgumentNullException(nameof(IFileService));
+        }
+
+        private readonly List<T> _items = new List<T>();
 
         /// <summary>
         /// Returns the count of items in the list.
@@ -110,16 +122,88 @@ namespace WTS.Services
         public List<string> ToStringList() => _items.Select(item => item.ToString()).ToList();
 
         /// <summary>
-        /// Returns a copy of the collection.
-        /// </summary>
-        /// <returns>A list of the collection.</returns>
-        public List<T> CopyList() => _items.ToList();
-
-        /// <summary>
         /// Checks if the given index is within the range of the collection.
         /// </summary>
         /// <param name="index">The index to check.</param>
         /// <returns>True if the index is out of range, otherwise false.</returns>
         public bool IsIndexInRange(int index) => index >= 0 && index < _items.Count;
+
+        public void SaveAsText(string fileName)
+        {
+            try
+            {
+                var data = string.Join("\n\n", _items.ConvertAll(item => item.ToString()));
+                _fileService.SaveDataToTextFile(fileName, data);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Data could not be saved", ex);
+            }
+        }
+
+        public void SaveAsJson(string fileName)
+        {
+            try
+            {
+                var data = _items.Select(item => FormatForJson(item.ToString())).ToList();
+                var jsonString = _fileService.SerializeListToJson(data);
+                _fileService.SaveDataToTextFile(fileName, jsonString);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Data could not be saved", ex);
+            }
+        }
+
+        private static Dictionary<string, string> FormatForJson(string itemString)
+        {
+            var dict = new Dictionary<string, string>();
+            var lines = itemString.Split('\n');
+            foreach (var line in lines)
+            {
+                var parts = line.Split(new[] { ": " }, StringSplitOptions.None);
+                if (parts.Length == 2)
+                {
+                    dict[parts[0].Trim()] = parts[1].Trim();
+                }
+            }
+            return dict;
+        }
+
+        public string LoadText(string fileName)
+        {
+            try
+            {
+                return _fileService.LoadDataFromTextFile(fileName);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Data could not be saved", ex);
+            }
+        }
+
+        public string LoadJson(string fileName)
+        {
+            try
+            {
+                var jsonString = _fileService.LoadDataFromTextFile(fileName);
+                var dictList = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(jsonString);
+                var builder = new StringBuilder();
+                foreach (var dict in dictList)
+                {
+                    foreach (var kvp in dict)
+                    {
+                        builder.AppendLine($"{kvp.Key}: {kvp.Value}");
+                    }
+                    builder.AppendLine();
+                }
+                return builder.ToString();
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Data could not be saved", ex);
+            }
+        }
     }
 }
