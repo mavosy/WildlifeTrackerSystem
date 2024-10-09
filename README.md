@@ -60,7 +60,11 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-<!-- [![Product Name Screen Shot][product-screenshot]](https://example.com) -->
+<div align="center">
+  <img src="Images/WTS_screenshot.png" alt="Product Screenshot" width="800"/>
+</div>
+
+<br />
 
 **WildlifeTrackerSystem** is a **WPF** application designed for tracking wildlife data as a fun, experimental school project, to practice various C# techniques. This project is designed using the **MVVM** pattern, and practises techniques like **dependency injection**, **event handling**, **command** patterns, and **data validation**. The application architecture is **bloated** intentionally, allowing the exploration of multiple software development concepts and patterns in a non-serious, sandbox environment.
 
@@ -195,7 +199,6 @@ Project Link: [https://github.com/mavosy/WildlifeTrackerSystem](https://github.c
 [license-url]: https://github.com/mavosy/WildlifeTrackerSystem/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/malte-von-sydow
-[product-screenshot]: images/screenshot.png
 [csharp-shield]: https://custom-icon-badges.demolab.com/badge/C%23-%23239120.svg?logo=cshrp&logoColor=white
 [csharp-url]: https://learn.microsoft.com/en-us/dotnet/csharp/
 [wpf-shield]: https://img.shields.io/badge/WPF-512BD4?style=for-the-badge&logo=windows&logoColor=white
